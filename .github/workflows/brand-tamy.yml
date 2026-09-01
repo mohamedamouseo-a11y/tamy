@@ -19,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Replace Agent Zero frontend branding with Tamy
+      - name: Replace visible legacy branding with Tamy
         shell: bash
         run: |
           set -euo pipefail
@@ -53,12 +53,39 @@ jobs:
                   continue
               updated = brand_pattern.sub('Tamy', original)
               updated = updated.replace('https://github.com/agent0ai/agent-zero', repo_url)
-              updated = updated.replace(
-                  'window.open("https://agent-zero.ai", "_blank")',
-                  f'window.open("{repo_url}", "_blank")',
-              )
+              updated = updated.replace('https://github.com/agent0ai/Tamy', repo_url)
+              updated = updated.replace('https://Tamy.ai', repo_url)
+              updated = updated.replace('https://www.Tamy.ai/p/docs/get-started/', repo_url)
+              updated = updated.replace('http://Tamy.ai/?community/api-dashboard/about', repo_url)
+              updated = updated.replace('https://www.Tamy.ai/p/community/api-dashboard/about/', repo_url)
+              updated = updated.replace('Use an Tamy-owned', 'Use a Tamy-owned')
               if updated != original:
                   path.write_text(updated, encoding='utf-8')
+
+          # Preserve invisible compatibility identifiers that tests/runtime depend on.
+          sw_path = root / 'webui' / 'sw.js'
+          sw = sw_path.read_text(encoding='utf-8')
+          sw = sw.replace('Tamy-ui-assets-', 'agent-zero-ui-assets-')
+          sw = sw.replace('X-Tamy-Cache', 'X-Agent-Zero-Cache')
+          sw = sw.replace('/.Tamy-cache/', '/.agent-zero-cache/')
+          sw_path.write_text(sw, encoding='utf-8')
+
+          browser_store_path = root / 'webui' / 'components' / 'modals' / 'file-browser' / 'file-browser-store.js'
+          browser_store = browser_store_path.read_text(encoding='utf-8')
+          browser_store = browser_store.replace('application/x-Tamy-files', 'application/x-agent-zero-files')
+          browser_store_path.write_text(browser_store, encoding='utf-8')
+
+          # Remove the upstream CLI promotion card so no legacy install domain is shown.
+          discovery_path = root / 'plugins' / '_discovery' / 'extensions' / 'webui' / 'onboarding-success-end' / 'discovery-cards.html'
+          discovery = discovery_path.read_text(encoding='utf-8')
+          discovery = re.sub(
+              r'\s*<article class="discovery-cli-card".*?</article>\s*',
+              '\n',
+              discovery,
+              count=1,
+              flags=re.DOTALL,
+          )
+          discovery_path.write_text(discovery, encoding='utf-8')
 
           splash_path = root / 'webui' / 'splash.html'
           splash = splash_path.read_text(encoding='utf-8')
@@ -69,7 +96,7 @@ jobs:
               'font-size="22" font-weight="700" fill="currentColor">Tamy</text></svg>'
           )
           splash = re.sub(
-              r'<svg xmlns="http://www\.w3\.org/2000/svg" viewBox="0 0 163 26" aria-hidden="true">.*?</svg>',
+              r'<svg xmlns="http://www\.w3\.org/2000/svg" viewBox="0 0 163 26" (?:aria-hidden="true"|aria-label="Tamy" role="img")>.*?</svg>',
               tamy_splash_logo,
               splash,
               count=1,
@@ -100,7 +127,9 @@ jobs:
               if (next !== node.nodeValue) node.nodeValue = next;
             }
 
-            const elements = scope.querySelectorAll ? scope.querySelectorAll("*") : [];
+            const elements = [];
+            if (scope.nodeType === Node.ELEMENT_NODE) elements.push(scope);
+            if (scope.querySelectorAll) elements.push(...scope.querySelectorAll("*"));
             for (const el of elements) {
               for (const attr of ["title", "aria-label", "alt", "placeholder"]) {
                 if (!el.hasAttribute?.(attr)) continue;
@@ -157,19 +186,20 @@ jobs:
           for name, content in assets.items():
               (public_dir / name).write_text(content, encoding='utf-8')
 
+          # Visible frontend source should no longer contain the legacy product name.
           leftovers = []
-          for path in targets + [root / 'webui' / 'branding.js']:
-              if not path.exists():
+          for path in targets:
+              if not path.exists() or path in (sw_path, browser_store_path):
                   continue
               try:
                   text = path.read_text(encoding='utf-8')
               except UnicodeDecodeError:
                   continue
               for line_no, line in enumerate(text.splitlines(), 1):
-                  if brand_pattern.search(line) and path.name != 'branding.js':
+                  if brand_pattern.search(line):
                       leftovers.append(f'{path}:{line_no}:{line.strip()}')
           if leftovers:
-              raise SystemExit('Legacy frontend branding remains:\n' + '\n'.join(leftovers[:100]))
+              raise SystemExit('Legacy visible branding remains:\n' + '\n'.join(leftovers[:100]))
           PY
 
           git config user.name "github-actions[bot]"
@@ -179,5 +209,5 @@ jobs:
             echo "No branding changes needed."
             exit 0
           fi
-          git commit -m "Brand frontend as Tamy"
+          git commit -m "Harden Tamy frontend branding"
           git push origin HEAD:main

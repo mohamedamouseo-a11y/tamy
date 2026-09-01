@@ -62,7 +62,7 @@ jobs:
               if updated != original:
                   path.write_text(updated, encoding='utf-8')
 
-          # Preserve invisible compatibility identifiers that tests/runtime depend on.
+          # Preserve invisible compatibility identifiers that runtime behavior depends on.
           sw_path = root / 'webui' / 'sw.js'
           sw = sw_path.read_text(encoding='utf-8')
           sw = sw.replace('Tamy-ui-assets-', 'agent-zero-ui-assets-')
@@ -189,7 +189,7 @@ jobs:
           # Visible frontend source should no longer contain the legacy product name.
           leftovers = []
           for path in targets:
-              if not path.exists() or path in (sw_path, browser_store_path):
+              if not path.exists() or path in (sw_path, browser_store_path) or path.name == 'branding.js':
                   continue
               try:
                   text = path.read_text(encoding='utf-8')

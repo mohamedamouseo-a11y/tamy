@@ -766,7 +766,7 @@ const model = {
     while (gen === scanPollGeneration) {
       if (Date.now() >= deadline) {
         this.agentScanning = false;
-        void toastFrontendError("Scan timed out while waiting for Agent Zero", SCAN_TITLE);
+        void toastFrontendError("Scan timed out while waiting for Tamy", SCAN_TITLE);
         return;
       }
       await sleep(SCAN_POLL_INTERVAL_MS);

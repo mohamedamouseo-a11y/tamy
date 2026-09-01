@@ -162,7 +162,7 @@ const model = {
 
     await this.openModalForTarget({
       target_type: "installed",
-      target_label: "Installed Agent Zero skills",
+      target_label: "Installed Tamy skills",
       paths,
       summary: {
         skill_count: response.skill_count || 0,
@@ -349,7 +349,7 @@ const model = {
     while (gen === scanPollGeneration) {
       if (Date.now() >= deadline) {
         this.agentScanning = false;
-        void toastFrontendError("Scan timed out while waiting for Agent Zero", SCAN_TITLE);
+        void toastFrontendError("Scan timed out while waiting for Tamy", SCAN_TITLE);
         return;
       }
       await sleep(SCAN_POLL_INTERVAL_MS);

@@ -36,7 +36,7 @@ Perform ONLY these phases. Do not add extra categories.
 
 ### Validation Reference
 
-Use these Agent Zero conventions while reviewing:
+Use these Tamy conventions while reviewing:
 
 {{CHECKLIST_GUIDANCE}}
 

@@ -269,7 +269,7 @@
                   </div>
                   <small>Use the current preset or choose another setup for this agent.</small>
                 </div>
-                <div class="agent-field wide"><label for="agent-editor-context" class="agent-field-label">When should other agents use this agent?</label><textarea id="agent-editor-context" rows="3" x-model="$store.agentEditor.draft.context" @input="$store.agentEditor.markMetadataSet('context')"></textarea><small>Helps Agent Zero decide when to delegate work; leaving this empty may reduce delegation quality.</small><button type="button" class="text-button" x-show="$store.agentEditor.canResetMetadata('context')" @click="$store.agentEditor.resetMetadata('context')">Reset to default</button><small class="field-status" x-show="$store.agentEditor.metadataResetPending('context')">Will reset to default on save.</small></div>
+                <div class="agent-field wide"><label for="agent-editor-context" class="agent-field-label">When should other agents use this agent?</label><textarea id="agent-editor-context" rows="3" x-model="$store.agentEditor.draft.context" @input="$store.agentEditor.markMetadataSet('context')"></textarea><small>Helps Tamy decide when to delegate work; leaving this empty may reduce delegation quality.</small><button type="button" class="text-button" x-show="$store.agentEditor.canResetMetadata('context')" @click="$store.agentEditor.resetMetadata('context')">Reset to default</button><small class="field-status" x-show="$store.agentEditor.metadataResetPending('context')">Will reset to default on save.</small></div>
               </div>
             </div>
           </section>
@@ -307,7 +307,7 @@
                 </div>
                 <div class="agent-editor-note" x-show="$store.agentEditor.selectedPromptDraft.dynamic_processor">This file is generated dynamically at runtime. Python processors are read-only and are not executed by the editor.</div>
                 <div id="agent-editor-prompt-ace" class="prompt-ace" :aria-invalid="$store.agentEditor.selectedPrompt === 'agent.system.main.specifics.md' && $store.agentEditor.fieldIssue('instructions') ? 'true' : null" :aria-describedby="$store.agentEditor.selectedPrompt === 'agent.system.main.specifics.md' && $store.agentEditor.fieldIssue('instructions') ? 'agent-editor-prompt-error' : null"></div>
-                <div class="agent-editor-note" role="alert" x-show="$store.agentEditor.aceUnavailable">Prompt editor is unavailable. Reload Agent Zero and try again.</div>
+                <div class="agent-editor-note" role="alert" x-show="$store.agentEditor.aceUnavailable">Prompt editor is unavailable. Reload Tamy and try again.</div>
                 <span id="agent-editor-prompt-error" class="field-error" role="alert" x-show="$store.agentEditor.selectedPrompt === 'agent.system.main.specifics.md' && $store.agentEditor.fieldIssue('instructions')" x-text="$store.agentEditor.fieldIssue('instructions')?.message"></span>
               </div>
             </div>

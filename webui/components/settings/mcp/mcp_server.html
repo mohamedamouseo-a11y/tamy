@@ -10,11 +10,11 @@
       internalTools: [
         {
           name: 'send_message',
-          description: 'Send a message to this Agent Zero instance, start a chat, or continue a persistent chat.'
+          description: 'Send a message to this Tamy instance, start a chat, or continue a persistent chat.'
         },
         {
           name: 'finish_chat',
-          description: 'Finish a persistent chat that was started through the Agent Zero MCP server.'
+          description: 'Finish a persistent chat that was started through the Tamy MCP server.'
         }
       ],
       get filteredInternalTools() {
@@ -27,14 +27,14 @@
         <div>
           <div class="section-title">A0 MCP Server</div>
           <div class="section-description">
-            Expose this Agent Zero instance as an MCP server for trusted clients. See <a href="javascript:openModal('settings/mcp/server/example.html')">connection example</a>.
+            Expose this Tamy instance as an MCP server for trusted clients. See <a href="javascript:openModal('settings/mcp/server/example.html')">connection example</a>.
           </div>
 
           <div class="field">
             <div class="field-label">
               <div class="field-title">Enable A0 MCP Server</div>
               <div class="field-description">
-                Make Agent Zero available over SSE/HTTP to MCP-compatible tools.
+                Make Tamy available over SSE/HTTP to MCP-compatible tools.
               </div>
             </div>
             <div class="field-control">
@@ -49,7 +49,7 @@
             <div class="field-label">
               <div class="field-title">Internal tools</div>
               <div class="field-description">
-                Tools exposed by this Agent Zero instance when the internal MCP server is enabled.
+                Tools exposed by this Tamy instance when the internal MCP server is enabled.
               </div>
             </div>
           </div>

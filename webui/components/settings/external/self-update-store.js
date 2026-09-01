@@ -201,7 +201,7 @@ const model = {
       return "Checking update status...";
     }
     if (!this.isSupported) {
-      return "Self-update is currently available only in dockerized Agent Zero deployments that boot through /exe/run_A0.sh.";
+      return "Self-update is currently available only in dockerized Tamy deployments that boot through /exe/run_A0.sh.";
     }
     if (!this.mainBranchLatestSupported) {
       return "The main branch is not currently available from the configured remote.";
@@ -216,10 +216,10 @@ const model = {
       if (this.quickBehindMinorCount !== null && this.quickBehindMinorCount <= 3) {
         return `This instance is ${this.quickBehindMinorCount} minor version${this.quickBehindMinorCount === 1 ? "" : "s"} behind the latest release currently available on main.`;
       }
-      return `This instance is significantly behind the latest release currently available on main. Restart Agent Zero to move to ${this.mainBranchLatestVersion}.`;
+      return `This instance is significantly behind the latest release currently available on main. Restart Tamy to move to ${this.mainBranchLatestVersion}.`;
     }
     if (this.quickUpdateComparison === 0) {
-      return "You already have the latest version of Agent Zero main branch";
+      return "You already have the latest version of Tamy main branch";
     }
     return "This checkout already reports a newer tagged version than main.";
   },
@@ -474,7 +474,7 @@ const model = {
     if (detail) {
       detail.textContent =
         this.restartDetailText ||
-        "Agent Zero is restarting, applying the requested release, and will reload this page when the health check responds again.";
+        "Tamy is restarting, applying the requested release, and will reload this page when the health check responds again.";
     }
   },
 
@@ -658,7 +658,7 @@ const model = {
     this.error = "";
     this.setRestartState(
       "Preparing update",
-      "Saving the request and asking Agent Zero to restart."
+      "Saving the request and asking Tamy to restart."
     );
     this.ensureProgressOverlay();
     try {
@@ -730,7 +730,7 @@ const model = {
         backup_name: this.form.backup_name,
         backup_conflict_policy: this.form.backup_conflict_policy,
       },
-      "Agent Zero is restarting to apply the requested branch and version target.",
+      "Tamy is restarting to apply the requested branch and version target.",
     );
   },
 
@@ -760,7 +760,7 @@ const model = {
         backup_conflict_policy:
           this.info?.defaults?.backup_conflict_policy || "rename",
       },
-      "Agent Zero is restarting to apply the latest version from main.",
+      "Tamy is restarting to apply the latest version from main.",
     );
   },
 
@@ -770,7 +770,7 @@ const model = {
     let observedBackendUnavailable = false;
     this.setRestartState(
       "Starting self-update",
-      "The request was saved. Agent Zero is about to restart and apply the requested branch and version target."
+      "The request was saved. Tamy is about to restart and apply the requested branch and version target."
     );
     this.ensureProgressOverlay();
 
@@ -791,11 +791,11 @@ const model = {
       if (restartResponse && !restartResponse.ok) {
         if (restartResponse.status >= 500) {
           console.warn(
-            `Restart request returned HTTP ${restartResponse.status} while Agent Zero was shutting down. Continuing to wait for the new runtime.`
+            `Restart request returned HTTP ${restartResponse.status} while Tamy was shutting down. Continuing to wait for the new runtime.`
           );
           this.setRestartState(
             "Restarting backend",
-            "Agent Zero is shutting down and applying the update. Waiting for the new runtime to come back healthy."
+            "Tamy is shutting down and applying the update. Waiting for the new runtime to come back healthy."
           );
         } else {
           throw new Error(
@@ -805,7 +805,7 @@ const model = {
       } else {
         this.setRestartState(
           "Restarting backend",
-          "Agent Zero accepted the restart request. Waiting for the updater to take over."
+          "Tamy accepted the restart request. Waiting for the updater to take over."
         );
       }
     } catch (error) {
@@ -816,7 +816,7 @@ const model = {
         throw error;
       }
       console.warn(
-        "Restart request connection closed while Agent Zero was restarting:",
+        "Restart request connection closed while Tamy was restarting:",
         error
       );
     }
@@ -831,7 +831,7 @@ const model = {
     let lastError = "";
     this.setRestartState(
       "Update in progress",
-      "Agent Zero is restarting and the updater is running. This page will reload automatically when /api/health starts responding again."
+      "Tamy is restarting and the updater is running. This page will reload automatically when /api/health starts responding again."
     );
 
     while (Date.now() < deadline) {
@@ -848,14 +848,14 @@ const model = {
         if (response.ok) {
           this.setRestartState(
             "Restarting backend",
-            "Waiting for Agent Zero to disconnect before reloading the page."
+            "Waiting for Tamy to disconnect before reloading the page."
           );
           lastError = "Health check is still responding before the restart has completed.";
         } else {
           observedBackendUnavailable = true;
           this.setRestartState(
             "Update in progress",
-            "Agent Zero is restarting and the updater is running. This page will reload automatically when the health check becomes healthy again."
+            "Tamy is restarting and the updater is running. This page will reload automatically when the health check becomes healthy again."
           );
           lastError = `Health check returned HTTP ${response.status}.`;
         }
@@ -863,7 +863,7 @@ const model = {
         observedBackendUnavailable = true;
         this.setRestartState(
           "Update in progress",
-          "Agent Zero is temporarily unavailable while it restarts. Waiting for the new runtime to become healthy."
+          "Tamy is temporarily unavailable while it restarts. Waiting for the new runtime to become healthy."
         );
         lastError = error?.message || String(error);
       }
@@ -880,7 +880,7 @@ const model = {
     this.resetRestartState();
     this.removeProgressOverlay();
     this.error =
-      "Agent Zero did not come back within the expected window. It may still be rolling back. " +
+      "Tamy did not come back within the expected window. It may still be rolling back. " +
       (lastError ? `Last health check error: ${lastError}` : "");
     await this.refresh();
   },

@@ -1,4 +1,4 @@
-const CACHE_PREFIX = "agent-zero-ui-assets-";
+const CACHE_PREFIX = "Tamy-ui-assets-";
 const SCRIPT_VERSION = new URL(self.location.href).searchParams.get("version") || "runtime";
 const MAX_RUNTIME_CACHEABLE_TRANSFER_BYTES = 256 * 1024;
 const CACHEABLE_FILE_PATTERN = /\.(?:css|html?|xhtml|m?js)$/i;
@@ -177,21 +177,21 @@ function responseFromEntry(entry) {
   return new Response(content, {
     headers: {
       "Content-Type": contentType || "application/octet-stream",
-      "X-Agent-Zero-Cache": "preloaded",
+      "X-Tamy-Cache": "preloaded",
     },
   });
 }
 
 function cacheMarkerRequest(targetCacheName) {
   return new Request(
-    new URL(`/.agent-zero-cache/${encodeURIComponent(targetCacheName)}`, self.location.origin),
+    new URL(`/.Tamy-cache/${encodeURIComponent(targetCacheName)}`, self.location.origin),
   );
 }
 
 function cacheBundleRequest(targetCacheName) {
   return new Request(
     new URL(
-      `/.agent-zero-cache/${encodeURIComponent(targetCacheName)}/bundle`,
+      `/.Tamy-cache/${encodeURIComponent(targetCacheName)}/bundle`,
       self.location.origin,
     ),
   );

@@ -207,7 +207,7 @@ export const store = createStore("onboarding", {
       ...override,
       id: providerId,
       name: override.name || fromDetails.name || fallback.name || providerId,
-      short_description: override.short_description || fromDetails.short_description || fallback.short_description || "Connect this provider to Agent Zero.",
+      short_description: override.short_description || fromDetails.short_description || fallback.short_description || "Connect this provider to Tamy.",
       logo: override.logo || fromDetails.logo || fallback.logo || "/public/darkSymbol.svg",
       api_key_mode: override.api_key_mode || fromDetails.api_key_mode || fallback.api_key_mode || "required",
     };
@@ -224,7 +224,7 @@ export const store = createStore("onboarding", {
         return {
           ...meta,
           name: "Other local endpoint",
-          short_description: "Point Agent Zero at a local compatible server.",
+          short_description: "Point Tamy at a local compatible server.",
           default_api_base: "",
           api_key_mode: "optional",
         };
@@ -296,7 +296,7 @@ export const store = createStore("onboarding", {
   titleText() {
     if (this.step === "setup") return "Choose your main model";
     if (this.step === "utility") return "Choose your utility model";
-    if (this.step === "ready") return "Agent Zero is ready";
+    if (this.step === "ready") return "Tamy is ready";
     return "Choose your AI provider";
   },
 
@@ -432,9 +432,9 @@ export const store = createStore("onboarding", {
   },
 
   setupPurpose() {
-    if (this.isOAuthProvider()) return "Connect this account, then choose the account-backed model Agent Zero should use.";
-    if (this.selectedProviderOrigin === "local") return "Choose a local model and confirm where Agent Zero can reach it.";
-    return "Choose a model and add the key Agent Zero will use for this provider.";
+    if (this.isOAuthProvider()) return "Connect this account, then choose the account-backed model Tamy should use.";
+    if (this.selectedProviderOrigin === "local") return "Choose a local model and confirm where Tamy can reach it.";
+    return "Choose a model and add the key Tamy will use for this provider.";
   },
 
   selectedProviderDocsUrl() {

@@ -408,7 +408,7 @@ export const store = createStore("browserConfig", {
 
   browserRuntimeStatusLabel() {
     if (this.config?.runtime_backend !== "host_required") {
-      return "Docker browser runs inside Agent Zero; A0 CLI host-browser status does not affect it.";
+      return "Docker browser runs inside Tamy; A0 CLI host-browser status does not affect it.";
     }
     const label = this.hostBrowserConnectorLabel();
     if (label.startsWith("Connect A0 CLI") || label.includes("unavailable")) {

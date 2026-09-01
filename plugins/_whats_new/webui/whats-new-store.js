@@ -7,7 +7,7 @@ const NEVER_SHOW_STORAGE_KEY = "a0_whats_new_never_show";
 const emptySlide = {
   eyebrow: "What's New",
   title: "No new updates right now",
-  summary: "New highlights will appear here when there are fresh Agent Zero updates.",
+  summary: "New highlights will appear here when there are fresh Tamy updates.",
   mediaType: "none",
   media: "",
   mediaLabel: "No new updates right now.",

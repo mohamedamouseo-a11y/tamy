@@ -47,9 +47,9 @@ const model = {
 
   get loginActionCopy() {
     if (this.loginProvider === "tailscale") {
-      return "Open the Tailscale link to approve this container or enable Funnel. Agent Zero will continue when Tailscale reports the public URL.";
+      return "Open the Tailscale link to approve this container or enable Funnel. Tamy will continue when Tailscale reports the public URL.";
     }
-    return "Approve the tunnel request, then Agent Zero will finish enabling Remote Control.";
+    return "Approve the tunnel request, then Tamy will finish enabling Remote Control.";
   },
 
   clearMicrosoftLogin() {
@@ -308,7 +308,7 @@ const model = {
       if (!hasAuth) {
         const proceed = confirm(
           "Remote Control works best with sign-in enabled.\n\n" +
-            "Without a login, anyone with the URL can reach this Agent Zero instance.\n\n" +
+            "Without a login, anyone with the URL can reach this Tamy instance.\n\n" +
             "Turn on authentication in Settings before sharing this link. Continue anyway?"
         );
 

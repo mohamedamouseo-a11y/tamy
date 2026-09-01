@@ -11,8 +11,8 @@ const SAVE_MESSAGE_MS = 1800;
 const INPUT_PUSH_DELAY_MS = 650;
 const DESKTOP_HEARTBEAT_MS = 3500;
 const DESKTOP_RESIZE_DELAY_MS = 80;
-const DESKTOP_START_MESSAGE = "Starting Agent Zero Desktop environment";
-const DESKTOP_RUNTIME_INSTALL_MESSAGE = "Installing Agent Zero Desktop runtime dependencies. This can take a few minutes after an update.";
+const DESKTOP_START_MESSAGE = "Starting Tamy Desktop environment";
+const DESKTOP_RUNTIME_INSTALL_MESSAGE = "Installing Tamy Desktop runtime dependencies. This can take a few minutes after an update.";
 const DESKTOP_RUNTIME_INSTALL_POLL_MS = 4000;
 const DESKTOP_RUNTIME_INSTALL_TIMEOUT_MS = 10 * 60 * 1000;
 const XPRA_DESKTOP_PRIME_INTERVAL_MS = 220;
@@ -378,7 +378,7 @@ const model = {
       force: true,
       restart: true,
       select: true,
-      message: "Restarting Agent Zero Desktop environment",
+      message: "Restarting Tamy Desktop environment",
     });
     if (!session) {
       this.setDesktopIntentionalShutdown(true);
@@ -521,7 +521,7 @@ const model = {
       if (Date.now() - startedAt > DESKTOP_RUNTIME_INSTALL_TIMEOUT_MS) {
         return {
           ...response,
-          error: "Agent Zero Desktop runtime installation is still running. Please try again in a moment.",
+          error: "Tamy Desktop runtime installation is still running. Please try again in a moment.",
         };
       }
       await sleep(DESKTOP_RUNTIME_INSTALL_POLL_MS);

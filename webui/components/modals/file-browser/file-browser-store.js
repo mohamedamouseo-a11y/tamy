@@ -965,7 +965,7 @@ const model = {
       ? this.selectedFiles.map((entry) => entry.path)
       : [file.path];
     event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("application/x-agent-zero-files", JSON.stringify(this.draggedPaths));
+    event.dataTransfer.setData("application/x-Tamy-files", JSON.stringify(this.draggedPaths));
     event.dataTransfer.setData("text/plain", this.draggedPaths.join("\n"));
     this.closeDropdown();
   },
@@ -1356,7 +1356,7 @@ const model = {
 
       const blob = await resp.blob();
       const url = URL.createObjectURL(blob);
-      const fallback = `agent-zero-files-${selectedFiles.length}.zip`;
+      const fallback = `Tamy-files-${selectedFiles.length}.zip`;
       const link = document.createElement("a");
       link.href = url;
       link.download = this.getDownloadFilename(resp, fallback);

@@ -13,7 +13,7 @@ const toast = globalThis.toast;
 const fetchApi = globalThis.fetchApi;
 
 // ⚠️ CRITICAL: The .env file contains API keys and essential configuration.
-// This file is REQUIRED for Agent Zero to function and must be backed up.
+// This file is REQUIRED for Tamy to function and must be backed up.
 
 const model = {
   // State
@@ -140,7 +140,7 @@ const model = {
         const exclude_patterns = response.default_patterns.exclude_patterns;
 
         return {
-          backup_name: `agent-zero-backup-${getCurrentUserDateString()}`,
+          backup_name: `Tamy-backup-${getCurrentUserDateString()}`,
           include_hidden: true,
           include_patterns: include_patterns,
           exclude_patterns: exclude_patterns,
@@ -156,7 +156,7 @@ const model = {
 
     // Fallback patterns (will be overridden by backend on first use)
     return {
-      backup_name: `agent-zero-backup-${timestamp.slice(0, 10)}`,
+      backup_name: `Tamy-backup-${timestamp.slice(0, 10)}`,
       include_hidden: true,
       include_patterns: [
         // These will be replaced with resolved absolute paths by backend
@@ -170,7 +170,7 @@ const model = {
     };
   },
 
-  // Editor Management - Following Agent Zero ACE editor patterns
+  // Editor Management - Following Tamy ACE editor patterns
   async initBackupEditor() {
     const container = document.getElementById("backup-metadata-editor");
     if (container) {
@@ -700,13 +700,13 @@ const model = {
 
     const warnings = [];
 
-    // Check Agent Zero version compatibility
+    // Check Tamy version compatibility
     // Note: Both backup and current versions are obtained via git.get_git_info()
     const backupVersion = this.backupMetadata.agent_zero_version;
     const currentVersion = globalThis.gitinfo.version; // Retrieved from git.get_git_info() on backend
 
     if (backupVersion !== currentVersion && backupVersion !== "development") {
-      warnings.push(`Backup created with Agent Zero ${backupVersion}, current version is ${currentVersion}`);
+      warnings.push(`Backup created with Tamy ${backupVersion}, current version is ${currentVersion}`);
     }
 
     // Check backup age

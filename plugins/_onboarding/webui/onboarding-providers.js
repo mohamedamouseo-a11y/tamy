@@ -32,8 +32,8 @@ export const LOCAL_PROVIDER_IDS = ["ollama", "lm_studio", "omlx", "llama_cpp", "
 export const ONBOARDING_PROVIDER_OVERRIDES = {
   a0_venice: {
     logo: "/public/darkSymbol.svg",
-    setup_url: "https://www.agent-zero.ai/p/community/api-dashboard/about/",
-    docs_url: "https://www.agent-zero.ai/p/community/api-dashboard/about/",
+    setup_url: "https://www.Tamy.ai/p/community/api-dashboard/about/",
+    docs_url: "https://www.Tamy.ai/p/community/api-dashboard/about/",
     api_key_mode: "required",
     model_list_autoload: true,
     short_description: "A0T token-based Venice.ai API Proxy.",

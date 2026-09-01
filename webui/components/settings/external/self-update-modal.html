@@ -25,7 +25,7 @@
               <div x-text="$store.selfUpdateStore.majorUpgradeBannerMessage"></div>
             </div>
             <a
-              href="https://www.agent-zero.ai/p/docs/get-started/"
+              href="https://www.Tamy.ai/p/docs/get-started/"
               target="_blank"
               rel="noreferrer"
             >
@@ -196,7 +196,7 @@
 
               <template x-if="!$store.selfUpdateStore.isSupported">
                 <div class="self-update-warning">
-                  Self-update is currently available only in dockerized Agent Zero deployments
+                  Self-update is currently available only in dockerized Tamy deployments
                   that boot through <code>/exe/run_A0.sh</code>.
                 </div>
               </template>
@@ -216,7 +216,7 @@
                 <div class="collapse" id="self-update-howto-collapse">
                   <div class="self-update-panel-body self-update-copy">
                     <p>
-                      Agent Zero saves this request into
+                      Tamy saves this request into
                       <code x-text="$store.selfUpdateStore.info?.paths?.update_file || '/exe/a0-self-update.yaml'"></code>,
                       restarts once, applies the requested branch and version target before the UI
                       starts again, then reloads this page when <code>/api/health</code> is healthy.
@@ -231,7 +231,7 @@
                       Version numbers use the format <code>vMAJOR.MINOR</code>. The first number is
                       the major release line and moving to a newer major version requires a newer
                       Docker image. The second number is the minor release line and those updates can
-                      be applied through Agent Zero self-update inside the existing image.
+                      be applied through Tamy self-update inside the existing image.
                     </p>
                     <p>
                       On development branches you may also see versions like <code>v1.5+2</code>.
@@ -317,7 +317,7 @@
                       <div class="field-title">Version</div>
                       <div class="field-description">
                         Choose a preloaded version target from the
-                        <a href="https://github.com/agent0ai/agent-zero" target="_blank" rel="noreferrer">Agent Zero repository</a>.
+                        <a href="https://github.com/agent0ai/Tamy" target="_blank" rel="noreferrer">Tamy repository</a>.
                         Only versions from the current major release line are listed here. Newer major lines require a Docker image update first.
                       </div>
                       <div class="field-description">
@@ -334,7 +334,7 @@
                       <div class="self-update-warning-banner">
                         <div x-text="$store.selfUpdateStore.higherMajorVersionMessage"></div>
                         <a
-                          href="https://www.agent-zero.ai/p/docs/get-started/"
+                          href="https://www.Tamy.ai/p/docs/get-started/"
                           target="_blank"
                           rel="noreferrer"
                         >
@@ -465,7 +465,7 @@
             <div class="self-update-progress-spinner"></div>
             <div>
               <div class="self-update-progress-title" x-text="$store.selfUpdateStore.restartStatusText || 'Update in progress'"></div>
-              <div class="self-update-progress-copy" x-text="$store.selfUpdateStore.restartDetailText || 'Waiting for Agent Zero to restart and become healthy again.'"></div>
+              <div class="self-update-progress-copy" x-text="$store.selfUpdateStore.restartDetailText || 'Waiting for Tamy to restart and become healthy again.'"></div>
             </div>
           </div>
 

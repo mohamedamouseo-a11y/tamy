@@ -1353,7 +1353,7 @@ const model = {
       : "<p>No files will change.</p>";
     const confirmed = await showConfirmDialog({
       title: this.pendingMutation.destructive ? "Delete all customizations for this profile?" : "Remove my changes?",
-      message: `${changes}<p>Agent Zero’s defaults are not touched.</p>`,
+      message: `${changes}<p>Tamy’s defaults are not touched.</p>`,
       confirmText: this.pendingMutation.destructive ? "Delete planned files" : "Remove planned changes",
       type: "danger",
     });

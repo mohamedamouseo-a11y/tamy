@@ -12,10 +12,10 @@
 
 ## Local Contracts
 
-- Use the Agent Zero plugin settings modal pattern: local `config`, `$store.pluginSettingsPrototype`, and a gated Alpine store.
+- Use the Tamy plugin settings modal pattern: local `config`, `$store.pluginSettingsPrototype`, and a gated Alpine store.
 - Register the Alpine store with `createStore("orchestratorStore", ...)`.
 - Use `callJsonApi()` for plugin API calls and A0 notification toasts for errors/info/success.
-- Refresh is a compact icon action consistent with Agent Zero settings UI.
+- Refresh is a compact icon action consistent with Tamy settings UI.
 - Summary cards do not render connected/needs-login/not-installed pills; detailed auth state belongs inside the expanded card.
 - Only show `Connect` for adapters with `supports_device_login`; currently that is Codex.
 - Only show `Disconnect` when the API says `can_disconnect`.

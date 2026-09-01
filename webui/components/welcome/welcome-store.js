@@ -274,7 +274,7 @@ const model = {
         fileBrowserStore.open();
         break;
       case "website":
-        window.open("https://agent-zero.ai", "_blank");
+        window.open("https://Tamy.ai", "_blank");
         break;
     }
   },

@@ -1,0 +1,182 @@
+name: Brand Tamy Frontend
+
+on:
+  push:
+    paths:
+      - '.github/workflows/brand-tamy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  brand:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Tamy
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Replace Agent Zero frontend branding with Tamy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('.')
+          repo_url = 'https://github.com/mohamedamouseo-a11y/tamy'
+          text_exts = {'.html', '.js', '.json', '.css', '.md', '.yaml', '.yml', '.txt'}
+          targets = []
+
+          for base in (root / 'webui', root / 'plugins'):
+              for path in base.rglob('*'):
+                  if not path.is_file() or path.suffix.lower() not in text_exts:
+                      continue
+                  rel = path.relative_to(root).as_posix()
+                  if rel.startswith('webui/vendor/'):
+                      continue
+                  if rel.startswith('webui/'):
+                      targets.append(path)
+                      continue
+                  if '/webui/' in rel or '/extensions/webui/' in rel or rel.endswith('/plugin.yaml'):
+                      targets.append(path)
+
+          brand_pattern = re.compile(r'\bAgent[\s-]+Zero\b', re.IGNORECASE)
+          for path in targets:
+              try:
+                  original = path.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              updated = brand_pattern.sub('Tamy', original)
+              updated = updated.replace('https://github.com/agent0ai/agent-zero', repo_url)
+              updated = updated.replace(
+                  'window.open("https://agent-zero.ai", "_blank")',
+                  f'window.open("{repo_url}", "_blank")',
+              )
+              if updated != original:
+                  path.write_text(updated, encoding='utf-8')
+
+          splash_path = root / 'webui' / 'splash.html'
+          splash = splash_path.read_text(encoding='utf-8')
+          tamy_splash_logo = (
+              '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 163 26" '
+              'aria-label="Tamy" role="img">'
+              '<text x="81.5" y="20" text-anchor="middle" font-family="Arial, sans-serif" '
+              'font-size="22" font-weight="700" fill="currentColor">Tamy</text></svg>'
+          )
+          splash = re.sub(
+              r'<svg xmlns="http://www\.w3\.org/2000/svg" viewBox="0 0 163 26" aria-hidden="true">.*?</svg>',
+              tamy_splash_logo,
+              splash,
+              count=1,
+              flags=re.DOTALL,
+          )
+          splash_path.write_text(splash, encoding='utf-8')
+
+          branding_js = r'''const TAMY_BRAND = "Tamy";
+          const TAMY_REPO_URL = "https://github.com/mohamedamouseo-a11y/tamy";
+          const LEGACY_BRAND_RE = /\bAgent[\s-]+Zero\b/gi;
+
+          function tamyBrandText(value) {
+            return typeof value === "string" ? value.replace(LEGACY_BRAND_RE, TAMY_BRAND) : value;
+          }
+
+          function tamyApplyBranding(root = document) {
+            if (!root) return;
+            const scope = root.nodeType === Node.ELEMENT_NODE || root.nodeType === Node.DOCUMENT_NODE || root.nodeType === Node.DOCUMENT_FRAGMENT_NODE
+              ? root
+              : root.parentElement;
+            if (!scope) return;
+
+            const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
+            let node;
+            while ((node = walker.nextNode())) {
+              if (node.parentElement?.closest("script,style")) continue;
+              const next = tamyBrandText(node.nodeValue);
+              if (next !== node.nodeValue) node.nodeValue = next;
+            }
+
+            const elements = scope.querySelectorAll ? scope.querySelectorAll("*") : [];
+            for (const el of elements) {
+              for (const attr of ["title", "aria-label", "alt", "placeholder"]) {
+                if (!el.hasAttribute?.(attr)) continue;
+                const current = el.getAttribute(attr);
+                const next = tamyBrandText(current);
+                if (next !== current) el.setAttribute(attr, next);
+              }
+              if (el.tagName === "A") {
+                const href = el.getAttribute("href") || "";
+                if (href.includes("github.com/agent0ai/agent-zero") || href === "https://agent-zero.ai" || href === "https://www.agent-zero.ai") {
+                  el.setAttribute("href", TAMY_REPO_URL);
+                }
+              }
+            }
+
+            for (const card of scope.querySelectorAll?.(".discovery-cli-card") || []) card.remove();
+            document.title = tamyBrandText(document.title || TAMY_BRAND);
+          }
+
+          const tamyObserver = new MutationObserver((records) => {
+            for (const record of records) {
+              if (record.type === "characterData") tamyApplyBranding(record.target.parentElement);
+              for (const added of record.addedNodes || []) tamyApplyBranding(added);
+            }
+          });
+
+          if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", () => tamyApplyBranding(document), { once: true });
+          } else {
+            tamyApplyBranding(document);
+          }
+
+          tamyObserver.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+          '''
+          (root / 'webui' / 'branding.js').write_text(branding_js, encoding='utf-8')
+
+          index_path = root / 'webui' / 'index.html'
+          index = index_path.read_text(encoding='utf-8')
+          if '/branding.js' not in index:
+              index = index.replace('</head>', '    <script type="module" src="/branding.js"></script>\n</head>', 1)
+          index_path.write_text(index, encoding='utf-8')
+
+          assets = {
+              'dark.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120"><text x="180" y="82" text-anchor="middle" font-family="Arial, sans-serif" font-size="72" font-weight="700" fill="#7a7a7a">Tamy</text></svg>',
+              'darkSymbol.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="3" y="3" width="26" height="26" rx="8" fill="currentColor" opacity=".16"/><path d="M8 8h16v4h-6v13h-4V12H8z" fill="currentColor"/></svg>',
+              'a0-fullDark.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 163 26" width="163" height="26"><text x="4" y="21" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#7a7a7a">Tamy</text></svg>',
+              'a0-collapsed.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 26" width="26" height="26"><path fill="#7a7a7a" d="M4 4h18v5h-6v14h-6V9H4z"/></svg>',
+              'favicon.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960"><rect width="960" height="960" rx="220" fill="#01041a"/><path d="M220 210h520v150H565v390H395V360H220z" fill="#fff"/></svg>',
+              'favicon_round.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960"><circle cx="480" cy="480" r="450" fill="#01041a"/><path d="M220 210h520v150H565v390H395V360H220z" fill="#fff"/></svg>',
+              'icon.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960"><rect width="960" height="960" rx="220" fill="#01041a"/><path d="M220 210h520v150H565v390H395V360H220z" fill="#fff"/></svg>',
+              'icon-maskable.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960"><rect width="960" height="960" fill="#01041a"/><path d="M220 210h520v150H565v390H395V360H220z" fill="#fff"/></svg>',
+          }
+          public_dir = root / 'webui' / 'public'
+          for name, content in assets.items():
+              (public_dir / name).write_text(content, encoding='utf-8')
+
+          leftovers = []
+          for path in targets + [root / 'webui' / 'branding.js']:
+              if not path.exists():
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              for line_no, line in enumerate(text.splitlines(), 1):
+                  if brand_pattern.search(line) and path.name != 'branding.js':
+                      leftovers.append(f'{path}:{line_no}:{line.strip()}')
+          if leftovers:
+              raise SystemExit('Legacy frontend branding remains:\n' + '\n'.join(leftovers[:100]))
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add webui plugins
+          if git diff --cached --quiet; then
+            echo "No branding changes needed."
+            exit 0
+          fi
+          git commit -m "Brand frontend as Tamy"
+          git push origin HEAD:main

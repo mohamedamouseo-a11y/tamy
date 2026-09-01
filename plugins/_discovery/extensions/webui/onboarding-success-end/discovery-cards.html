@@ -80,35 +80,7 @@
                         </div>
                     </article>
                 </template>
-
-                <article class="discovery-cli-card" aria-labelledby="discovery-cli-title">
-                    <div class="discovery-cli-content">
-                        <span class="discovery-cli-kicker">CLI Connector</span>
-                        <h3 class="discovery-cli-title" id="discovery-cli-title">Connect Tamy to your desktop</h3>
-                        <p class="discovery-cli-desc">
-                            Install the CLI Connector when you want A0 to use your host terminal,
-                            local files, and a browser from your computer.
-                        </p>
-                        <div class="discovery-cli-commands" aria-label="CLI Connector install commands">
-                            <div class="discovery-cli-command">
-                                <span class="discovery-cli-label">macOS / Linux</span>
-                                <code>curl -LsSf https://cli.Tamy.ai/install.sh | sh</code>
-                            </div>
-                            <div class="discovery-cli-command">
-                                <span class="discovery-cli-label">Windows PowerShell</span>
-                                <code>irm https://cli.Tamy.ai/install.ps1 | iex</code>
-                            </div>
-                        </div>
-                    </div>
-
-                    <figure class="discovery-cli-preview" aria-label="Tamy CLI Connector preview">
-                        <img src="/plugins/_discovery/webui/assets/cli-connector-preview.png"
-                             alt="Tamy CLI Connector terminal preview"
-                             loading="lazy">
-                    </figure>
-                </article>
-
-                <div class="discovery-undismiss" x-show="$store.discoveryStore.hasDismissedCards">
+<div class="discovery-undismiss" x-show="$store.discoveryStore.hasDismissedCards">
                     <button type="button"
                             class="discovery-undismiss-btn"
                             @click="$store.discoveryStore.undismissCards()">

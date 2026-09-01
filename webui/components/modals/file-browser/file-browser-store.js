@@ -965,7 +965,7 @@ const model = {
       ? this.selectedFiles.map((entry) => entry.path)
       : [file.path];
     event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("application/x-Tamy-files", JSON.stringify(this.draggedPaths));
+    event.dataTransfer.setData("application/x-agent-zero-files", JSON.stringify(this.draggedPaths));
     event.dataTransfer.setData("text/plain", this.draggedPaths.join("\n"));
     this.closeDropdown();
   },

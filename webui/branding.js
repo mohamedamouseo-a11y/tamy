@@ -21,7 +21,9 @@ function tamyApplyBranding(root = document) {
     if (next !== node.nodeValue) node.nodeValue = next;
   }
 
-  const elements = scope.querySelectorAll ? scope.querySelectorAll("*") : [];
+  const elements = [];
+  if (scope.nodeType === Node.ELEMENT_NODE) elements.push(scope);
+  if (scope.querySelectorAll) elements.push(...scope.querySelectorAll("*"));
   for (const el of elements) {
     for (const attr of ["title", "aria-label", "alt", "placeholder"]) {
       if (!el.hasAttribute?.(attr)) continue;

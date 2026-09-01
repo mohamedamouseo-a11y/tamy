@@ -29,7 +29,11 @@ jobs:
           rm -rf /tmp/agent-zero
           GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 https://github.com/agent0ai/agent-zero.git /tmp/agent-zero
           SOURCE_SHA="$(git -C /tmp/agent-zero rev-parse HEAD)"
-          rsync -a --delete --exclude='.git' /tmp/agent-zero/ ./
+          rsync -a --delete --exclude='.git' --exclude='.github/workflows/' /tmp/agent-zero/ ./
           git add -A
-          git commit -m "Import Agent Zero ${SOURCE_SHA}"
+          if git diff --cached --quiet; then
+            echo "No changes to import"
+            exit 0
+          fi
+          git commit -m "Import Agent Zero ${SOURCE_SHA} (non-workflow files)"
           git push origin HEAD:main

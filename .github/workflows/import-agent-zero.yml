@@ -1,0 +1,35 @@
+name: Import Agent Zero
+
+on:
+  push:
+    paths:
+      - '.github/workflows/import-agent-zero.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Tamy
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Mirror public Agent Zero into Tamy
+        shell: bash
+        env:
+          GIT_LFS_SKIP_SMUDGE: '1'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -rf /tmp/agent-zero
+          GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 https://github.com/agent0ai/agent-zero.git /tmp/agent-zero
+          SOURCE_SHA="$(git -C /tmp/agent-zero rev-parse HEAD)"
+          rsync -a --delete --exclude='.git' /tmp/agent-zero/ ./
+          git add -A
+          git commit -m "Import Agent Zero ${SOURCE_SHA}"
+          git push origin HEAD:main

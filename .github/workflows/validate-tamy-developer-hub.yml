@@ -1,0 +1,39 @@
+name: Validate Tamy Developer Hub
+
+on:
+  push:
+    paths:
+      - 'helpers/tamy_developer_hub.py'
+      - 'helpers/tamy_developer_hub.py.dox.md'
+      - 'api/tamy_developer_hub.py'
+      - 'api/tamy_developer_hub.py.dox.md'
+      - 'tests/test_tamy_developer_hub.py'
+      - 'webui/components/settings/developer/developer-hub.html'
+      - 'webui/components/settings/developer/developer-hub-store.js'
+      - 'webui/components/settings/developer/developer-settings.html'
+      - '.github/workflows/validate-tamy-developer-hub.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Tamy
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install focused test dependencies
+        run: python -m pip install --disable-pip-version-check pytest 'cryptography>=46.0.0'
+
+      - name: Compile Developer Hub backend
+        run: python -m py_compile helpers/tamy_developer_hub.py api/tamy_developer_hub.py
+
+      - name: Run Developer Hub tests
+        run: pytest -q tests/test_tamy_developer_hub.py

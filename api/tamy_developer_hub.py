@@ -21,7 +21,8 @@ class TamyDeveloperHub(ApiHandler):
             if action == "state":
                 return {"ok": True, "state": hub.get_state()}
             if action == "refresh":
-                return {"ok": True, "state": hub.get_state(fetch_remote=True)}
+                hub._fetch_remote()
+                return {"ok": True, "state": hub.get_state()}
             if action == "connect":
                 connection = hub.connect_github(str(input.get("token") or ""))
                 return {"ok": True, "connection": connection, "state": hub.get_state()}

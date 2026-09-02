@@ -35,12 +35,18 @@ jobs:
       - name: Compile Developer Hub backend
         id: compile
         continue-on-error: true
-        run: python -m py_compile helpers/tamy_developer_hub.py api/tamy_developer_hub.py
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m py_compile helpers/tamy_developer_hub.py api/tamy_developer_hub.py 2>&1 | tee /tmp/devhub-compile.log
 
       - name: Run Developer Hub tests
         id: tests
         continue-on-error: true
-        run: pytest -q tests/test_tamy_developer_hub.py
+        shell: bash
+        run: |
+          set -o pipefail
+          pytest -q tests/test_tamy_developer_hub.py 2>&1 | tee /tmp/devhub-tests.log
 
       - name: Record validation result
         if: always()
@@ -52,14 +58,25 @@ jobs:
           mkdir -p .github/validation
           python - <<'PY'
           import json, os
+          from pathlib import Path
+
           compile_outcome = os.environ.get('COMPILE_OUTCOME', 'unknown')
           test_outcome = os.environ.get('TEST_OUTCOME', 'unknown')
           status = 'success' if compile_outcome == 'success' and test_outcome == 'success' else 'failure'
+
+          def tail(path):
+              p = Path(path)
+              if not p.is_file():
+                  return ''
+              return p.read_text(encoding='utf-8', errors='replace')[-4000:]
+
           payload = {
               'status': status,
               'validated_sha': os.environ.get('VALIDATED_SHA', ''),
               'compile': compile_outcome,
               'tests': test_outcome,
+              'compile_log': tail('/tmp/devhub-compile.log'),
+              'test_log': tail('/tmp/devhub-tests.log'),
           }
           with open('.github/validation/tamy-developer-hub.json', 'w', encoding='utf-8') as handle:
               json.dump(payload, handle, indent=2)

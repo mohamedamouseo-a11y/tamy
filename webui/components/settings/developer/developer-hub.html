@@ -1,0 +1,269 @@
+<html>
+<head>
+  <title>Developer Hub</title>
+  <script type="module">
+    import { store as developerHubStore } from "/components/settings/developer/developer-hub-store.js";
+  </script>
+</head>
+<body>
+  <div x-data>
+    <template x-if="$store.developerHub">
+      <section
+        id="section-developer-hub"
+        class="tamy-devhub"
+        x-create="$store.developerHub.onOpen()"
+        x-destroy="$store.developerHub.cleanup()"
+      >
+        <header class="tamy-devhub-header">
+          <div>
+            <div class="tamy-devhub-kicker">Tamy Developer Hub</div>
+            <h2>GitHub Console</h2>
+            <p>Review local changes, protect secrets, and safely sync Tamy with GitHub.</p>
+          </div>
+          <button
+            type="button"
+            class="btn"
+            @click="$store.developerHub.refresh(Boolean($store.developerHub.state?.connection?.connected))"
+            :disabled="$store.developerHub.loading"
+          >
+            <x-icon name="refresh"></x-icon>
+            Refresh
+          </button>
+        </header>
+
+        <div class="tamy-devhub-alert" x-show="$store.developerHub.state?.error">
+          <x-icon name="warning"></x-icon>
+          <span x-text="$store.developerHub.state?.error"></span>
+        </div>
+
+        <div class="tamy-devhub-grid">
+          <article class="tamy-devhub-card tamy-devhub-connection">
+            <div class="tamy-devhub-card-title">
+              <div>
+                <span class="tamy-devhub-eyebrow">Connection</span>
+                <h3>GitHub</h3>
+              </div>
+              <span
+                class="tamy-devhub-badge"
+                :class="$store.developerHub.state?.connection?.connected ? 'is-good' : 'is-muted'"
+                x-text="$store.developerHub.state?.connection?.connected ? 'Connected' : 'Not connected'"
+              ></span>
+            </div>
+
+            <template x-if="!$store.developerHub.state?.connection?.connected">
+              <div class="tamy-devhub-connect-form">
+                <label for="tamy-devhub-token">Personal access token</label>
+                <div class="tamy-devhub-inline">
+                  <input
+                    id="tamy-devhub-token"
+                    type="password"
+                    autocomplete="new-password"
+                    placeholder="GitHub token"
+                    x-model="$store.developerHub.tokenDraft"
+                    @keydown.enter.prevent="$store.developerHub.connect()"
+                  />
+                  <button type="button" class="btn btn-ok" @click="$store.developerHub.connect()" :disabled="$store.developerHub.loading">
+                    Connect
+                  </button>
+                </div>
+                <small>The token is encrypted on the server and is never shown again.</small>
+              </div>
+            </template>
+
+            <template x-if="$store.developerHub.state?.connection?.connected">
+              <div class="tamy-devhub-connected">
+                <div>
+                  <span class="tamy-devhub-label">Signed in as</span>
+                  <strong x-text="$store.developerHub.state?.connection?.user || 'GitHub user'"></strong>
+                </div>
+                <div class="tamy-devhub-inline-actions">
+                  <button type="button" class="btn" @click="$store.developerHub.loadBranches()" :disabled="$store.developerHub.loading">
+                    Branches
+                  </button>
+                  <button
+                    type="button"
+                    class="btn tamy-devhub-danger"
+                    @click="$confirmClick($event, () => $store.developerHub.disconnect())"
+                    :disabled="$store.developerHub.loading"
+                  >
+                    Disconnect
+                  </button>
+                </div>
+              </div>
+            </template>
+
+            <div class="tamy-devhub-branches" x-show="$store.developerHub.branches.length">
+              <span class="tamy-devhub-label">GitHub branches</span>
+              <div class="tamy-devhub-chip-row">
+                <template x-for="branch in $store.developerHub.branches" :key="branch.name">
+                  <span class="tamy-devhub-chip" :class="branch.allowed ? 'is-active' : ''">
+                    <span x-text="branch.name"></span>
+                    <small x-show="branch.allowed">Write target</small>
+                  </span>
+                </template>
+              </div>
+            </div>
+          </article>
+
+          <article class="tamy-devhub-card">
+            <div class="tamy-devhub-card-title">
+              <div>
+                <span class="tamy-devhub-eyebrow">Repository</span>
+                <h3 x-text="$store.developerHub.state?.repo || 'Tamy'">Tamy</h3>
+              </div>
+              <span
+                class="tamy-devhub-badge"
+                :class="$store.developerHub.state?.write_ready ? 'is-good' : 'is-warning'"
+                x-text="$store.developerHub.state?.write_ready ? 'Write ready' : 'Protected'"
+              ></span>
+            </div>
+
+            <dl class="tamy-devhub-meta">
+              <div><dt>Branch</dt><dd x-text="$store.developerHub.state?.branch || '—'"></dd></div>
+              <div><dt>Allowed branch</dt><dd x-text="$store.developerHub.state?.allowed_branch || 'main'"></dd></div>
+              <div><dt>Local HEAD</dt><dd class="mono" x-text="$store.developerHub.shortSha($store.developerHub.state?.head)"></dd></div>
+              <div><dt>GitHub HEAD</dt><dd class="mono" x-text="$store.developerHub.shortSha($store.developerHub.state?.remote_head)"></dd></div>
+            </dl>
+
+            <div class="tamy-devhub-sync-summary">
+              <div><strong x-text="$store.developerHub.state?.ahead ?? 0"></strong><span>Ahead</span></div>
+              <div><strong x-text="$store.developerHub.state?.behind ?? 0"></strong><span>Behind</span></div>
+              <div><strong x-text="$store.developerHub.changedFiles.length"></strong><span>Changed</span></div>
+            </div>
+
+            <div class="tamy-devhub-inline-actions">
+              <button type="button" class="btn" @click="$store.developerHub.pull()" :disabled="$store.developerHub.loading || !$store.developerHub.state?.write_ready">
+                <x-icon name="download"></x-icon>
+                Pull
+              </button>
+              <button type="button" class="btn" @click="$store.developerHub.sync()" :disabled="$store.developerHub.loading || !$store.developerHub.state?.write_ready">
+                <x-icon name="sync"></x-icon>
+                Two-way Sync
+              </button>
+              <button type="button" class="btn" @click="$store.developerHub.cleanup()" :disabled="$store.developerHub.loading || !$store.developerHub.state?.repo_available">
+                <x-icon name="cleaning_services"></x-icon>
+                Cleanup
+              </button>
+            </div>
+          </article>
+        </div>
+
+        <article class="tamy-devhub-card tamy-devhub-changes">
+          <div class="tamy-devhub-card-title">
+            <div>
+              <span class="tamy-devhub-eyebrow">Review</span>
+              <h3>Changed files</h3>
+            </div>
+            <button type="button" class="btn" @click="$store.developerHub.selectAll()" :disabled="!$store.developerHub.changedFiles.length">
+              Select all
+            </button>
+          </div>
+
+          <div class="tamy-devhub-empty" x-show="!$store.developerHub.changedFiles.length">
+            <x-icon name="check_circle"></x-icon>
+            <span>Working tree is clean.</span>
+          </div>
+
+          <div class="tamy-devhub-file-list" x-show="$store.developerHub.changedFiles.length">
+            <template x-for="file in $store.developerHub.changedFiles" :key="file.path">
+              <label class="tamy-devhub-file-row">
+                <input
+                  type="checkbox"
+                  :checked="$store.developerHub.isSelected(file.path)"
+                  @change="$store.developerHub.togglePath(file.path, $event.target.checked)"
+                />
+                <span class="tamy-devhub-file-main">
+                  <strong class="mono" x-text="file.path"></strong>
+                  <small x-show="file.original_path" x-text="`from ${file.original_path}`"></small>
+                </span>
+                <span class="tamy-devhub-file-status" x-text="$store.developerHub.statusLabel(file)"></span>
+              </label>
+            </template>
+          </div>
+
+          <div class="tamy-devhub-commit-row">
+            <div>
+              <label for="tamy-devhub-message">Commit message</label>
+              <input
+                id="tamy-devhub-message"
+                type="text"
+                maxlength="160"
+                placeholder="Describe this change"
+                x-model="$store.developerHub.commitMessage"
+                @input="$store.developerHub.invalidateReview()"
+              />
+            </div>
+            <button
+              type="button"
+              class="btn"
+              @click="$store.developerHub.reviewPush()"
+              :disabled="$store.developerHub.loading || !$store.developerHub.state?.write_ready"
+            >
+              <x-icon name="fact_check"></x-icon>
+              Review Push
+            </button>
+          </div>
+        </article>
+
+        <article class="tamy-devhub-card tamy-devhub-review" x-show="$store.developerHub.review">
+          <div class="tamy-devhub-card-title">
+            <div>
+              <span class="tamy-devhub-eyebrow">Ready</span>
+              <h3>Push preview</h3>
+            </div>
+            <span class="tamy-devhub-badge is-good">Secret scan passed</span>
+          </div>
+
+          <div class="tamy-devhub-review-grid">
+            <div><span>Review fingerprint</span><strong class="mono" x-text="$store.developerHub.shortSha($store.developerHub.review?.review_id)"></strong></div>
+            <div><span>Selected files</span><strong x-text="$store.developerHub.review?.selected_count ?? 0"></strong></div>
+            <div><span>Existing commits ahead</span><strong x-text="$store.developerHub.review?.ahead ?? 0"></strong></div>
+          </div>
+
+          <div class="tamy-devhub-review-files">
+            <template x-for="file in ($store.developerHub.review?.files || [])" :key="file.path">
+              <div>
+                <span class="mono" x-text="file.path"></span>
+                <small x-text="`+${file.stats?.added || 0} / -${file.stats?.deleted || 0}`"></small>
+              </div>
+            </template>
+          </div>
+
+          <div class="tamy-devhub-push-bar">
+            <p>The push will be rejected automatically if files or GitHub HEAD change after this review.</p>
+            <button type="button" class="btn btn-ok" @click="$store.developerHub.push()" :disabled="$store.developerHub.loading">
+              <x-icon name="upload"></x-icon>
+              Push to GitHub
+            </button>
+          </div>
+        </article>
+
+        <article class="tamy-devhub-card">
+          <div class="tamy-devhub-card-title">
+            <div>
+              <span class="tamy-devhub-eyebrow">Audit</span>
+              <h3>Operation log</h3>
+            </div>
+          </div>
+          <div class="tamy-devhub-empty" x-show="!($store.developerHub.state?.operations || []).length">
+            No Developer Hub operations yet.
+          </div>
+          <div class="tamy-devhub-log" x-show="($store.developerHub.state?.operations || []).length">
+            <template x-for="(entry, index) in ($store.developerHub.state?.operations || [])" :key="`${entry.action}-${index}`">
+              <div class="tamy-devhub-log-row">
+                <span class="tamy-devhub-badge" :class="entry.status === 'success' ? 'is-good' : 'is-danger'" x-text="entry.status"></span>
+                <strong x-text="entry.action"></strong>
+                <span x-text="entry.detail"></span>
+              </div>
+            </template>
+          </div>
+        </article>
+      </section>
+    </template>
+  </div>
+</body>
+</html>
+
+<style>
+.tamy-devhub{display:grid;gap:1rem;padding-bottom:1rem}.tamy-devhub-header,.tamy-devhub-card-title,.tamy-devhub-connected,.tamy-devhub-push-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem}.tamy-devhub-header h2,.tamy-devhub-card h3{margin:.15rem 0}.tamy-devhub-header p{margin:.25rem 0 0;color:var(--color-text-muted)}.tamy-devhub-kicker,.tamy-devhub-eyebrow,.tamy-devhub-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:#d2a63c}.tamy-devhub-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.tamy-devhub-card{display:grid;gap:1rem;padding:1rem;border:1px solid var(--color-border);border-radius:var(--border-radius-sm);background:var(--color-panel)}.tamy-devhub-alert{display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;border:1px solid #d2a63c;border-radius:var(--border-radius-sm);background:color-mix(in srgb,#d2a63c 10%,transparent)}.tamy-devhub-badge{display:inline-flex;align-items:center;padding:.28rem .58rem;border:1px solid var(--color-border);border-radius:999px;font-size:.73rem;text-transform:capitalize}.tamy-devhub-badge.is-good{border-color:#6fcf97;color:#6fcf97}.tamy-devhub-badge.is-warning{border-color:#d2a63c;color:#d2a63c}.tamy-devhub-badge.is-danger{border-color:var(--color-error-text);color:var(--color-error-text)}.tamy-devhub-badge.is-muted{color:var(--color-text-muted)}.tamy-devhub-connect-form{display:grid;gap:.5rem}.tamy-devhub-connect-form small{color:var(--color-text-muted)}.tamy-devhub-inline,.tamy-devhub-inline-actions,.tamy-devhub-chip-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}.tamy-devhub-inline input{flex:1;min-width:12rem}.tamy-devhub input{min-height:2.5rem;border:1px solid var(--color-border);border-radius:var(--border-radius-sm);background:var(--color-input);color:var(--color-text);padding:.55rem .7rem}.tamy-devhub-danger{color:var(--color-error-text)}.tamy-devhub-branches{display:grid;gap:.45rem}.tamy-devhub-chip{display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .55rem;border:1px solid var(--color-border);border-radius:999px;font-size:.78rem}.tamy-devhub-chip.is-active{border-color:#d2a63c;color:#d2a63c}.tamy-devhub-chip small{opacity:.8}.tamy-devhub-meta{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin:0}.tamy-devhub-meta div{display:grid;gap:.2rem}.tamy-devhub-meta dt{font-size:.72rem;color:var(--color-text-muted)}.tamy-devhub-meta dd{margin:0}.mono{font-family:var(--font-family-code);overflow-wrap:anywhere}.tamy-devhub-sync-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}.tamy-devhub-sync-summary div{display:grid;gap:.15rem;padding:.7rem;border:1px solid var(--color-border);border-radius:var(--border-radius-sm);text-align:center}.tamy-devhub-sync-summary strong{font-size:1.25rem}.tamy-devhub-sync-summary span{font-size:.72rem;color:var(--color-text-muted)}.tamy-devhub-file-list{display:grid;border:1px solid var(--color-border);border-radius:var(--border-radius-sm);overflow:hidden}.tamy-devhub-file-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:.7rem;padding:.65rem .75rem;border-bottom:1px solid var(--color-border);cursor:pointer}.tamy-devhub-file-row:last-child{border-bottom:0}.tamy-devhub-file-main{display:grid;min-width:0;gap:.15rem}.tamy-devhub-file-main small{color:var(--color-text-muted)}.tamy-devhub-file-status{font-size:.72rem;color:var(--color-text-muted)}.tamy-devhub-empty{display:flex;align-items:center;justify-content:center;gap:.55rem;min-height:4rem;color:var(--color-text-muted);border:1px dashed var(--color-border);border-radius:var(--border-radius-sm)}.tamy-devhub-commit-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:.75rem}.tamy-devhub-commit-row>div{display:grid;gap:.4rem}.tamy-devhub-review-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem}.tamy-devhub-review-grid>div{display:grid;gap:.25rem;padding:.75rem;border:1px solid var(--color-border);border-radius:var(--border-radius-sm)}.tamy-devhub-review-grid span{font-size:.72rem;color:var(--color-text-muted)}.tamy-devhub-review-files,.tamy-devhub-log{display:grid;gap:.35rem;max-height:15rem;overflow:auto}.tamy-devhub-review-files>div,.tamy-devhub-log-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.65rem;padding:.55rem .65rem;border-bottom:1px solid var(--color-border)}.tamy-devhub-log-row{grid-template-columns:auto auto minmax(0,1fr)}.tamy-devhub-log-row>span:last-child{color:var(--color-text-muted);overflow-wrap:anywhere}.tamy-devhub-push-bar p{margin:0;color:var(--color-text-muted);max-width:52rem}@media(max-width:900px){.tamy-devhub-grid,.tamy-devhub-meta,.tamy-devhub-review-grid,.tamy-devhub-commit-row{grid-template-columns:1fr}.tamy-devhub-header,.tamy-devhub-card-title,.tamy-devhub-connected,.tamy-devhub-push-bar{align-items:stretch;flex-direction:column}.tamy-devhub-file-row{grid-template-columns:auto minmax(0,1fr)}.tamy-devhub-file-status{grid-column:2}.tamy-devhub-sync-summary{grid-template-columns:1fr 1fr 1fr}.tamy-devhub-log-row{grid-template-columns:auto 1fr}.tamy-devhub-log-row>span:last-child{grid-column:1/-1}}
+</style>

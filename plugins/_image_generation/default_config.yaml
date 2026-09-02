@@ -1,0 +1,27 @@
+provider: auto
+provider_order:
+  - openai
+  - stability
+  - openai_compatible
+timeout_seconds: 120
+output_dir: usr/workdir/generated_images
+
+openai:
+  api_key_env: OPENAI_API_KEY
+  api_key: ""
+  base_url: https://api.openai.com/v1
+  model: gpt-image-2
+
+stability:
+  api_key_env: STABILITY_API_KEY
+  api_key: ""
+  endpoint: https://api.stability.ai/v2beta/stable-image/generate/core
+  output_format: png
+
+openai_compatible:
+  api_key_env: TAMY_IMAGE_API_KEY
+  api_key: ""
+  base_url_env: TAMY_IMAGE_API_BASE
+  base_url: ""
+  model_env: TAMY_IMAGE_MODEL
+  model: ""

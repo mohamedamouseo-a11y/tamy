@@ -23,15 +23,24 @@ class TamyUsersTests(unittest.TestCase):
         self.assertIsNotNone(tamy_users.authenticate("admin", "password123"))
         self.assertNotIn("password_hash", tamy_users.list_users()[0])
 
+    def test_legacy_credentials_are_preserved_exactly(self):
+        tamy_users.ensure_legacy_superadmin("admin@example.com", "x")
+        authenticated = tamy_users.authenticate("admin@example.com", "x")
+        self.assertIsNotNone(authenticated)
+        self.assertEqual(authenticated["role"], "superadmin")
+
     def test_wrong_password_fails(self):
         tamy_users.create_user("admin", "password123")
         self.assertIsNone(tamy_users.authenticate("admin", "wrong-password"))
 
     def test_last_superadmin_cannot_be_removed(self):
         tamy_users.create_user("admin", "password123")
-        with self.assertRaises(ValueError): tamy_users.update_user("admin", role="user")
-        with self.assertRaises(ValueError): tamy_users.update_user("admin", active=False)
-        with self.assertRaises(ValueError): tamy_users.delete_user("admin")
+        with self.assertRaises(ValueError):
+            tamy_users.update_user("admin", role="user")
+        with self.assertRaises(ValueError):
+            tamy_users.update_user("admin", active=False)
+        with self.assertRaises(ValueError):
+            tamy_users.delete_user("admin")
 
     def test_second_admin_allows_role_change(self):
         tamy_users.create_user("admin", "password123")

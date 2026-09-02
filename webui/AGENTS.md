@@ -3,15 +3,16 @@
 ## Purpose
 
 - Own the Flask-served Alpine.js WebUI shell, frontend modules, components, CSS, static assets, and vendored browser libraries.
-- Keep the UI coherent with backend APIs, WebSocket state, plugin extension points, and documented frontend patterns.
+- Keep the UI coherent with backend APIs, WebSocket state, plugin extension points, documented frontend patterns, and the Tamy product identity.
 
 ## Ownership
 
 - `splash.html` owns the self-contained cache/bootstrap document served at `/`; `safe.html` owns the self-contained service-worker escape hatch served at `/safe`; `index.html`, `index.js`, and `index.css` define the rendered main UI shell served directly at `/index.html` and `/safe`, and fetched from `/ui/index` for in-place installation at `/`.
+- `branding.css` owns the Tamy visual identity overrides and brand palette; `branding.js` owns user-facing legacy-name cleanup for dynamically rendered frontend content.
 - `components/` owns self-contained Alpine components and component stores.
 - `js/` owns shared frontend modules, API clients, WebSocket clients, stores, extension loaders, and utility code.
 - `css/` owns shared stylesheet modules.
-- `public/` owns first-party static image/icon assets.
+- `public/` owns first-party static image/icon assets, including Tamy logo and PWA assets.
 - `vendor/` owns vendored third-party browser libraries.
 
 ## Local Contracts
@@ -22,6 +23,7 @@
 - Use `/js/api.js` helpers so CSRF and auth behavior stays consistent.
 - Component tags use `<x-component path="...">`; paths are resolved under `webui/components/` when not already prefixed.
 - Frontend extension breakpoints use `<x-extension id="...">` and are loaded through `/js/extensions.js`.
+- Tamy branding must remain presentation-only where possible: preserve invisible runtime/API/cache identifiers that existing backend or browser contracts depend on. User-facing product references, startup/login/sidebar identity, favicons, and PWA presentation should use Tamy.
 - `sw.js` owns same-origin HTML/CSS/JavaScript caching. The self-contained splash fetches `/ui/index` and the gzip-compressed `/ui/asset-bundle` in parallel, installs the versioned worker, waits until the bundle is usable in memory, and then installs the rendered index into the current `/` document without navigation. The worker persists the whole prepared bundle as one Cache Storage response in the background and removes obsolete version caches. Eligible text bodies up to 512 KiB each may be embedded; unknown or runtime-computed text URLs use one ordinary backend request and are cached as the native response when their transferred body is at most 256 KiB. The worker does not parse imports, call a secondary graph endpoint, or perform compression. Worker, cache, bundle, and timeout failures fall through to the already-started backend document or ordinary backend asset request. Media, images, fonts, and manifests use normal browser HTTP caching.
 - `splash.html` keeps its logo, styling, and bootstrap logic self-contained. Before replacing the document, it carries its current overlay markup into the rendered index. `index.html` owns the matching inline critical overlay style and fades that same visual overlay after initial component/extension readiness, with a bounded failure timeout; it must not contain duplicate static overlay markup. Icon-font preloading begins when the index is placed behind the overlay, continues independently behind square transparent placeholders, and must neither compete with the startup bundle nor delay the application reveal. `safe.html` must remain self-contained: its first phase unregisters all service workers for the origin, then replaces itself with the directly rendered `/safe` phase without fetching the bundle or registering a worker. The direct phase repeats unregistration defensively but does not initialize a worker; returning to `/` may install the current worker again. The rendered index removes only the internal safe-mode query marker from `/safe` in browser history. Except for the tiny blocking icon guard stylesheet needed to prevent ligature layout shifts, initial application stylesheets remain non-render-blocking.
 - `js/icons.js` owns the native `<x-icon>` element. First-party WebUI and bundled-plugin markup must use `<x-icon name="lowercase_snake_case"></x-icon>` for static Material Symbols and `:name="expression"` for Alpine-driven names; do not put ligature text inside the element or author new `.material-symbols-outlined` spans. The element uses the single local WOFF2 font rather than per-icon SVG requests, validates names, defaults unlabeled icons to `aria-hidden="true"`, and retains the legacy Material class internally so established selectors continue to apply. The shared vendor CSS constrains both `<x-icon>` and legacy ligature spans to a clipped 1:1 em square and keeps them transparent until the icon face is confirmed after the installed application document finishes parsing. `.material-symbols-outlined` and `.material-icons-outlined` spans remain supported for third-party plugin compatibility but are not the first-party authoring API.
@@ -45,6 +47,7 @@
 
 - Run targeted WebUI/frontend tests when available.
 - Manually smoke-test visible UI changes with `python run_ui.py` when behavior cannot be covered by tests.
+- For Tamy identity changes, verify startup, login, expanded/collapsed sidebar logo, dynamic UI text, favicon/PWA metadata, dark mode, and light mode.
 - Verify desktop and mobile layout for substantial UI changes.
 
 ## Child DOX Index

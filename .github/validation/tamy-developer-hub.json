@@ -1,8 +1,8 @@
 {
-  "status": "failure",
-  "validated_sha": "ec9a4f5a8f1c8fda6e8346e3d4fa070d85b37849",
+  "status": "success",
+  "validated_sha": "1591a8ca9c4a627c66658b25252c4d78f14fb20d",
   "compile": "success",
-  "tests": "failure",
+  "tests": "success",
   "compile_log": "",
-  "test_log": "\n==================================== ERRORS ====================================\n______________ ERROR collecting tests/test_tamy_developer_hub.py _______________\nImportError while importing test module '/home/runner/work/tamy/tamy/tests/test_tamy_developer_hub.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/importlib/__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/test_tamy_developer_hub.py:7: in <module>\n    from helpers import tamy_developer_hub as hub\nE   ModuleNotFoundError: No module named 'helpers'\n=========================== short test summary info ============================\nERROR tests/test_tamy_developer_hub.py\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n1 error in 0.30s\n"
+  "test_log": ".....                                                                    [100%]\n5 passed in 0.28s\n"
 }

@@ -1,0 +1,35 @@
+<html>
+<head>
+  <script type="module">
+    import { store as tamyUsersStore } from "/components/settings/users/users-store.js";
+  </script>
+</head>
+<body>
+  <section id="section-users" class="settings-section tamy-users" x-data x-create="$store.tamyUsers.load()" x-destroy="$store.tamyUsers.cleanup()">
+    <div><h2>Users & Access</h2><p class="tamy-users-muted">Super Admins manage system settings. Standard users can use Tamy without access to providers, API keys, plugins, or system configuration.</p></div>
+    <div class="tamy-user-create">
+      <input type="text" placeholder="Username" autocomplete="off" x-model="$store.tamyUsers.draft.username">
+      <input type="password" placeholder="Temporary password" autocomplete="new-password" x-model="$store.tamyUsers.draft.password">
+      <select x-model="$store.tamyUsers.draft.role"><option value="user">User</option><option value="superadmin">Super Admin</option></select>
+      <button type="button" class="btn btn-ok" @click="$store.tamyUsers.createUser()" :disabled="$store.tamyUsers.loading">Add user</button>
+    </div>
+    <div class="tamy-user-list">
+      <template x-for="user in $store.tamyUsers.users" :key="user.username">
+        <article class="tamy-user-row">
+          <div class="tamy-user-identity"><strong x-text="user.username"></strong><span class="tamy-role-badge" :class="`role-${user.role}`" x-text="user.role === 'superadmin' ? 'Super Admin' : 'User'"></span><span class="tamy-status" :class="user.active ? 'is-active' : 'is-disabled'" x-text="user.active ? 'Active' : 'Disabled'"></span></div>
+          <div class="tamy-user-actions">
+            <select :value="user.role" @change="$store.tamyUsers.setRole(user, $event.target.value)"><option value="user">User</option><option value="superadmin">Super Admin</option></select>
+            <button type="button" class="btn" @click="$store.tamyUsers.setActive(user, !user.active)" x-text="user.active ? 'Disable' : 'Enable'"></button>
+            <input type="password" placeholder="New password" autocomplete="new-password" x-model="user.newPassword">
+            <button type="button" class="btn" @click="$store.tamyUsers.resetPassword(user)">Reset password</button>
+            <button type="button" class="btn tamy-danger" @click="$store.tamyUsers.deleteUser(user)">Delete</button>
+          </div>
+        </article>
+      </template>
+    </div>
+  </section>
+</body>
+</html>
+<style>
+.tamy-users{display:grid;gap:1rem}.tamy-users-muted{margin:.35rem 0 0;color:var(--color-text-muted);max-width:58rem}.tamy-user-create{display:grid;grid-template-columns:1.2fr 1.4fr .9fr auto;gap:.65rem;padding:1rem;border:1px solid var(--color-border);border-radius:var(--border-radius-sm);background:var(--color-panel)}.tamy-user-create input,.tamy-user-create select,.tamy-user-actions input,.tamy-user-actions select{min-height:2.5rem;border:1px solid var(--color-border);border-radius:var(--border-radius-sm);background:var(--color-input);color:var(--color-text);padding:.55rem .7rem}.tamy-user-list{display:grid;gap:.7rem}.tamy-user-row{display:grid;gap:.8rem;padding:1rem;border:1px solid var(--color-border);border-radius:var(--border-radius-sm);background:var(--color-panel)}.tamy-user-identity,.tamy-user-actions{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}.tamy-role-badge,.tamy-status{padding:.25rem .55rem;border-radius:999px;font-size:.75rem;border:1px solid var(--color-border)}.tamy-role-badge.role-superadmin{border-color:#d2a63c;color:#d2a63c}.tamy-status.is-active{color:#6fcf97}.tamy-status.is-disabled{color:var(--color-text-muted)}.tamy-user-actions input{min-width:10rem}.tamy-danger{color:var(--color-error-text)}@media(max-width:900px){.tamy-user-create{grid-template-columns:1fr}.tamy-user-actions{align-items:stretch;flex-direction:column}}
+</style>

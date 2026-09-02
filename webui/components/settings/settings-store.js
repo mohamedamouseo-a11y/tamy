@@ -80,6 +80,14 @@ const TAB_ITEMS = Object.freeze([
     ],
   },
   {
+    id: "users",
+    label: "Users & Access",
+    icon: "manage_accounts",
+    sections: [
+      { id: "section-users", label: "Users", icon: "group" },
+    ],
+  },
+  {
     id: "backup",
     label: "Check for updates",
     icon: "system_update_alt",

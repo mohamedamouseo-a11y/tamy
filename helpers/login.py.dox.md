@@ -47,3 +47,9 @@
 ## Child DOX Index
 
 No child DOX files.
+
+## Tamy RBAC
+- Login authenticates against the Tamy runtime user store while preserving the legacy environment credential hash API.
+- `AUTH_LOGIN` / `AUTH_PASSWORD` bootstrap the first `superadmin` once.
+- Flask sessions carry username, role, and a revocable per-user session token.
+- `is_authenticated_session()` and `is_superadmin()` are the authorization entry points for HTTP/API code.

@@ -48,6 +48,10 @@ class ApiHandler:
         return True
 
     @classmethod
+    def requires_superadmin(cls) -> bool:
+        return False
+
+    @classmethod
     def get_methods(cls) -> list[str]:
         return ["POST"]
 
@@ -177,11 +181,22 @@ def requires_auth(f):
     async def decorated(*args, **kwargs):
         from helpers import login
 
-        user_pass_hash = login.get_credentials_hash()
-        if not user_pass_hash:
+        if not login.is_login_required():
             return await f(*args, **kwargs)
-        if session.get("authentication") != user_pass_hash:
+        if not login.is_authenticated_session(session):
             return redirect(url_for("login_handler", next=get_current_request_next_url()))
+        return await f(*args, **kwargs)
+
+    return decorated
+
+
+def requires_superadmin(f):
+    @wraps(f)
+    async def decorated(*args, **kwargs):
+        from helpers import login
+
+        if not login.is_superadmin(session):
+            return Response("Superadmin access required", 403, mimetype="text/plain")
         return await f(*args, **kwargs)
 
     return decorated
@@ -265,6 +280,8 @@ def register_api_route(app: Flask, lock: ThreadLockType) -> None:
             handler_fn = csrf_protect(handler_fn)
         if handler_cls.requires_api_key():
             handler_fn = requires_api_key(handler_fn)
+        if handler_cls.requires_superadmin():
+            handler_fn = requires_superadmin(handler_fn)
         if handler_cls.requires_auth():
             handler_fn = requires_auth(handler_fn)
         if handler_cls.requires_loopback():

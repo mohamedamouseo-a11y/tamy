@@ -65,3 +65,8 @@
 ## Child DOX Index
 
 No child DOX files.
+
+## Tamy multi-user login
+- `/login` authenticates Tamy runtime users and stores a revocable username/role/session token tuple in Flask session state.
+- `/logout` clears all Tamy identity session fields.
+- The WebUI receives the current username, role, and `isSuperAdmin` flag through `runtimeInfo`; backend checks remain authoritative.

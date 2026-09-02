@@ -45,3 +45,6 @@
 ## Child DOX Index
 
 No child DOX files.
+
+## Tamy authorization
+- Global settings reads are superadmin-only because the payload contains provider/system configuration.

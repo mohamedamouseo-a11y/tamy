@@ -70,3 +70,8 @@
 ## Child DOX Index
 
 No child DOX files.
+
+## Tamy role authorization
+- API handlers may override `requires_superadmin()` to restrict a route to the Tamy superadmin role.
+- Authentication validates the current Tamy user session rather than comparing a single global credential hash.
+- Superadmin authorization is enforced server-side and returns HTTP 403 for ordinary users.

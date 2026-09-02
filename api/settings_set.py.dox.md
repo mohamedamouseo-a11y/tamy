@@ -43,3 +43,6 @@
 ## Child DOX Index
 
 No child DOX files.
+
+## Tamy authorization
+- Global settings writes are superadmin-only.

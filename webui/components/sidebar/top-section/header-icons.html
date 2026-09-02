@@ -41,11 +41,11 @@
           <x-icon aria-hidden="true" name="home"></x-icon>
         </button>
 
-        <button class="config-button header-action-button" id="header-plugins" @click="openModal('components/plugins/list/plugin-list.html')" title="Plugins" aria-label="Plugins" tabindex="-1">
+        <button x-show="globalThis.runtimeInfo?.isSuperAdmin" class="config-button header-action-button" id="header-plugins" @click="openModal('components/plugins/list/plugin-list.html')" title="Plugins" aria-label="Plugins" tabindex="-1">
           <x-icon aria-hidden="true" name="extension"></x-icon>
         </button>
 
-        <button class="config-button header-action-button" id="header-settings" @click="openModal('settings/settings.html')" title="Settings" aria-label="Settings" tabindex="-1">
+        <button x-show="globalThis.runtimeInfo?.isSuperAdmin" class="config-button header-action-button" id="header-settings" @click="openModal('settings/settings.html')" title="Settings" aria-label="Settings" tabindex="-1">
           <x-icon aria-hidden="true" name="settings"></x-icon>
         </button>
 
@@ -88,7 +88,7 @@
           <span>Files</span>
         </button>
 
-        <button class="dropdown-item" @click="ensureModalOpen('settings/tunnel/remote-link.html'); $store.sidebar.menuClose()">
+        <button x-show="globalThis.runtimeInfo?.isSuperAdmin" class="dropdown-item" @click="ensureModalOpen('settings/tunnel/remote-link.html'); $store.sidebar.menuClose()">
           <x-icon name="share"></x-icon>
           <span>Remote Control</span>
         </button>
@@ -103,7 +103,7 @@
           <span>Tasks</span>
         </button>
 
-        <button class="dropdown-item" @click="openModal('settings/settings.html'); $store.sidebar.menuClose()">
+        <button x-show="globalThis.runtimeInfo?.isSuperAdmin" class="dropdown-item" @click="openModal('settings/settings.html'); $store.sidebar.menuClose()">
           <x-icon name="settings"></x-icon>
           <span>Settings</span>
         </button>
@@ -153,7 +153,7 @@
           <span>Logout</span>
         </button>
 
-        <button class="dropdown-item" @click="$confirmClick($event, () => { $store.chats.restart(); $store.sidebar.menuClose() })">
+        <button x-show="globalThis.runtimeInfo?.isSuperAdmin" class="dropdown-item" @click="$confirmClick($event, () => { $store.chats.restart(); $store.sidebar.menuClose() })">
           <x-icon name="restart_alt"></x-icon>
           <span>Restart Tamy</span>
         </button>

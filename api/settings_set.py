@@ -6,6 +6,10 @@ from typing import Any
 
 
 class SetSettings(ApiHandler):
+    @classmethod
+    def requires_superadmin(cls) -> bool:
+        return True
+
     async def process(self, input: dict[Any, Any], request: Request) -> dict[Any, Any] | Response:
         frontend = input.get("settings", input)
         browser_timezone = input.get("browser_timezone")

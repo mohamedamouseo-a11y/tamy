@@ -271,22 +271,23 @@ class UiRouteHandlers:
         )
 
         if request.method == "POST":
-            user = dotenv.get_dotenv_value("AUTH_LOGIN")
-            password = dotenv.get_dotenv_value("AUTH_PASSWORD")
+            user = login.authenticate(
+                request.form.get("username", ""),
+                request.form.get("password", ""),
+            )
 
-            if request.form["username"] == user and request.form["password"] == password:
-                session["authentication"] = login.get_credentials_hash()
+            if user:
+                login.begin_session(session, user)
                 return redirect(next_url or fallback_url)
-            else:
-                await asyncio.sleep(1)
-                error = "Invalid Credentials. Please try again."
+            await asyncio.sleep(1)
+            error = "Invalid Credentials. Please try again."
 
         login_page_content = files.read_file("webui/login.html")
         return render_template_string(login_page_content, error=error, next=next_url)
 
     @extensible
     async def logout_handler(self):
-        session.pop("authentication", None)
+        login.clear_session(session)
         return redirect(url_for("login_handler"))
 
     @requires_auth
@@ -345,6 +346,10 @@ class UiRouteHandlers:
         except Exception:
             webui_extension_manifest = "null"
 
+        current_identity = login.current_user(session) or {}
+        current_user_json = json.dumps(str(current_identity.get("username") or ""))
+        current_role_json = json.dumps(str(current_identity.get("role") or ""))
+
         index = files.read_file("webui/index.html")
         return files.replace_placeholders_text(
             _content=index,
@@ -352,7 +357,10 @@ class UiRouteHandlers:
             version_time=gitinfo["commit_time"],
             runtime_id=runtime.get_runtime_id(),
             runtime_is_development=("true" if runtime.is_development() else "false"),
-            logged_in=("true" if login.get_credentials_hash() else "false"),
+            logged_in=("true" if login.is_authenticated_session(session) else "false"),
+            current_user_json=current_user_json,
+            current_role_json=current_role_json,
+            is_superadmin=("true" if login.is_superadmin(session) else "false"),
             user_timezone_setting=user_timezone_setting,
             user_time_format_setting=user_time_format_setting,
             user_ui_control_visibility=user_ui_control_visibility,

@@ -1,11 +1,11 @@
 {
   "name": "Tamy",
   "short_name": "Tamy",
-  "description": "Autonomous AI agent",
+  "description": "Tamy AI Agent",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1a1a1a",
-  "theme_color": "#333333",
+  "background_color": "#0B0B0B",
+  "theme_color": "#D2A63C",
   "icons": [
     {
       "src": "/public/icon-maskable.svg",

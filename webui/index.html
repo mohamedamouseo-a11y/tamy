@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="theme-color" content="#0B0B0B">
     <title>Tamy</title>
 
     <style id="startup-transition-critical">
@@ -21,7 +22,7 @@
         }
         #startup-transition[data-theme="light"],
         body.light-mode #startup-transition { background: #fafafa; color: #000; }
-        #startup-transition > svg {
+        #startup-transition > img.tamy-splash-logo {
             width: clamp(12rem, 34vw, 23rem);
             max-width: 72vw;
             height: auto;
@@ -176,6 +177,7 @@
     </script>
     <!-- Plugin head injections (scripts, stylesheets) -->
     <x-extension id="page-head"></x-extension>
+    <link rel="preload" as="style" href="/branding.css" onload="this.onload=null;this.rel='stylesheet'">
     <script type="module" src="/branding.js"></script>
 </head>
 

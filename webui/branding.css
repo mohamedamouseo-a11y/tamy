@@ -1,0 +1,48 @@
+/* Tamy identity layer */
+:root {
+  --tamy-gold: #D2A63C;
+  --tamy-gold-dark: #A97C22;
+  --color-primary-dark: #C9A24A;
+  --color-highlight-dark: #D2A63C;
+  --color-accent-dark: #C9A24A;
+  --color-primary-light: #8B661D;
+  --color-highlight-light: #A97C22;
+  --color-accent-light: #8B661D;
+}
+
+#startup-transition > img.tamy-splash-logo {
+  width: clamp(16rem, 38vw, 30rem);
+  max-width: 78vw;
+  height: auto;
+  object-fit: contain;
+}
+
+#a0-logo,
+#a0-logo-collapsed {
+  background-color: transparent !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+  background-repeat: no-repeat !important;
+  background-position: left center !important;
+  background-size: contain !important;
+}
+
+#a0-logo {
+  background-image: url('/public/a0-fullDark.svg') !important;
+}
+
+#a0-logo-collapsed {
+  background-image: url('/public/a0-collapsed.svg') !important;
+}
+
+.sidebar-header-panel {
+  border: 1px solid color-mix(in srgb, var(--tamy-gold) 18%, transparent) !important;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline-color: var(--tamy-gold) !important;
+}

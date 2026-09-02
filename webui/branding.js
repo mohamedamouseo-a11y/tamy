@@ -1,9 +1,11 @@
 const TAMY_BRAND = "Tamy";
 const TAMY_REPO_URL = "https://github.com/mohamedamouseo-a11y/tamy";
 const LEGACY_BRAND_RE = /\bAgent[\s-]+Zero\b/gi;
+const LEGACY_SHORT_RE = /\bA0\b/g;
 
 function tamyBrandText(value) {
-  return typeof value === "string" ? value.replace(LEGACY_BRAND_RE, TAMY_BRAND) : value;
+  if (typeof value !== "string") return value;
+  return value.replace(LEGACY_BRAND_RE, TAMY_BRAND).replace(LEGACY_SHORT_RE, TAMY_BRAND);
 }
 
 function tamyApplyBranding(root = document) {
@@ -16,7 +18,7 @@ function tamyApplyBranding(root = document) {
   const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
   let node;
   while ((node = walker.nextNode())) {
-    if (node.parentElement?.closest("script,style")) continue;
+    if (node.parentElement?.closest("script,style,code,pre")) continue;
     const next = tamyBrandText(node.nodeValue);
     if (next !== node.nodeValue) node.nodeValue = next;
   }

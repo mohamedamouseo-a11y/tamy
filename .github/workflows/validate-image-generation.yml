@@ -1,0 +1,43 @@
+name: Validate Tamy Image Generation
+
+on:
+  push:
+    paths:
+      - 'plugins/_image_generation/**'
+      - '.github/workflows/validate-image-generation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Tamy
+        uses: actions/checkout@v4
+
+      - name: Validate image generation plugin
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile plugins/_image_generation/tools/image_generation.py
+          python3 - <<'PY'
+          from pathlib import Path
+
+          required = [
+              Path('plugins/_image_generation/plugin.yaml'),
+              Path('plugins/_image_generation/default_config.yaml'),
+              Path('plugins/_image_generation/tools/image_generation.py'),
+              Path('plugins/_image_generation/prompts/agent.system.tool.image_generation.md'),
+          ]
+          missing = [str(path) for path in required if not path.is_file()]
+          if missing:
+              raise SystemExit('Missing required image generation files: ' + ', '.join(missing))
+
+          source = required[2].read_text(encoding='utf-8')
+          for provider in ('openai', 'stability', 'openai_compatible'):
+              if provider not in source:
+                  raise SystemExit(f'Missing provider implementation: {provider}')
+          print('Tamy image generation plugin validation passed.')
+          PY

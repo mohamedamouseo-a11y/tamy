@@ -1,0 +1,9 @@
+name: _image_generation
+title: Tamy Image Generation
+description: Generate images through multiple API providers with automatic fallback.
+version: 1.0.0
+settings_sections:
+  - agent
+per_project_config: true
+per_agent_config: false
+always_enabled: true

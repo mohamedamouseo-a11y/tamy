@@ -1,10 +1,10 @@
-# Tamy branding pass
 name: Brand Tamy Frontend
 
 on:
   push:
     paths:
       - '.github/workflows/brand-tamy.yml'
+      - '.github/branding/**'
   workflow_dispatch:
 
 permissions:
@@ -19,39 +19,80 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Replace visible legacy branding with Tamy
+      - name: Apply Tamy identity
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
+          import base64
+          import json
           import re
 
           root = Path('.')
+          public = root / 'webui' / 'public'
+          public.mkdir(parents=True, exist_ok=True)
           repo_url = 'https://github.com/mohamedamouseo-a11y/tamy'
-          text_exts = {'.html', '.js', '.json', '.css', '.md', '.yaml', '.yml', '.txt'}
-          targets = []
 
+          # Exact selected Tamy brain/circuit mark, stored as a compact source asset.
+          icon_b64 = (root / '.github' / 'branding' / 'tamy-logo-icon.b64').read_text(encoding='utf-8').strip()
+          (public / 'tamy-logo-icon.png').write_bytes(base64.b64decode(icon_b64))
+
+          gold = '#D2A63C'
+          gold_dark = '#A97C22'
+          silver = '#F2F2F2'
+          black = '#0B0B0B'
+
+          # Horizontal Tamy lockup used on login/startup and compatible legacy asset paths.
+          lockup_svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 210" role="img" aria-label="Tamy AI Agent">
+            <defs>
+              <linearGradient id="tamyGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F2D07A"/><stop offset="0.48" stop-color="{gold}"/><stop offset="1" stop-color="{gold_dark}"/></linearGradient>
+              <linearGradient id="tamySilver" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#C8C8C8"/></linearGradient>
+            </defs>
+            <image href="data:image/png;base64,{icon_b64}" x="8" y="8" width="194" height="194" preserveAspectRatio="xMidYMid meet"/>
+            <text x="235" y="116" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="500" letter-spacing="17" fill="url(#tamySilver)">TAMY</text>
+            <line x1="238" y1="158" x2="285" y2="158" stroke="url(#tamyGold)" stroke-width="3"/>
+            <text x="305" y="166" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="600" letter-spacing="9" fill="url(#tamyGold)">AI AGENT</text>
+            <line x1="612" y1="158" x2="660" y2="158" stroke="url(#tamyGold)" stroke-width="3"/>
+          </svg>'''
+
+          symbol_svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Tamy">
+            <image href="data:image/png;base64,{icon_b64}" x="3" y="3" width="194" height="194" preserveAspectRatio="xMidYMid meet"/>
+          </svg>'''
+
+          app_icon_svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Tamy">
+            <rect x="12" y="12" width="488" height="488" rx="118" fill="{black}"/>
+            <image href="data:image/png;base64,{icon_b64}" x="72" y="70" width="368" height="372" preserveAspectRatio="xMidYMid meet"/>
+          </svg>'''
+
+          for name in ('dark.svg', 'a0-fullDark.svg'):
+              (public / name).write_text(lockup_svg, encoding='utf-8')
+          for name in ('darkSymbol.svg', 'a0-collapsed.svg'):
+              (public / name).write_text(symbol_svg, encoding='utf-8')
+          for name in ('favicon.svg', 'favicon_round.svg', 'icon.svg', 'icon-maskable.svg'):
+              (public / name).write_text(app_icon_svg, encoding='utf-8')
+
+          # Replace the old public-facing product name without touching backend internals.
+          brand_pattern = re.compile(r'\bAgent[\s-]+Zero\b', re.IGNORECASE)
+          text_exts = {'.html', '.js', '.json', '.yaml', '.yml'}
+          targets = []
           for base in (root / 'webui', root / 'plugins'):
               for path in base.rglob('*'):
                   if not path.is_file() or path.suffix.lower() not in text_exts:
                       continue
                   rel = path.relative_to(root).as_posix()
-                  if rel.startswith('webui/vendor/'):
+                  if rel.startswith('webui/vendor/') or path.name == 'AGENTS.md':
                       continue
-                  if rel.startswith('webui/'):
-                      targets.append(path)
-                      continue
-                  if '/webui/' in rel or '/extensions/webui/' in rel or rel.endswith('/plugin.yaml'):
+                  if rel.startswith('webui/') or '/webui/' in rel or '/extensions/webui/' in rel or rel.endswith('/plugin.yaml'):
                       targets.append(path)
 
-          brand_pattern = re.compile(r'\bAgent[\s-]+Zero\b', re.IGNORECASE)
           for path in targets:
               try:
                   original = path.read_text(encoding='utf-8')
               except UnicodeDecodeError:
                   continue
               updated = brand_pattern.sub('Tamy', original)
+              updated = updated.replace('Restart A0', 'Restart Tamy')
               updated = updated.replace('https://github.com/agent0ai/agent-zero', repo_url)
               updated = updated.replace('https://github.com/agent0ai/Tamy', repo_url)
               updated = updated.replace('https://Tamy.ai', repo_url)
@@ -62,7 +103,7 @@ jobs:
               if updated != original:
                   path.write_text(updated, encoding='utf-8')
 
-          # Preserve invisible compatibility identifiers that runtime behavior depends on.
+          # Preserve invisible compatibility identifiers the runtime depends on.
           sw_path = root / 'webui' / 'sw.js'
           sw = sw_path.read_text(encoding='utf-8')
           sw = sw.replace('Tamy-ui-assets-', 'agent-zero-ui-assets-')
@@ -75,41 +116,97 @@ jobs:
           browser_store = browser_store.replace('application/x-Tamy-files', 'application/x-agent-zero-files')
           browser_store_path.write_text(browser_store, encoding='utf-8')
 
-          # Remove the upstream CLI promotion card so no legacy install domain is shown.
+          # Remove upstream promotional CLI card from the employee-facing UI.
           discovery_path = root / 'plugins' / '_discovery' / 'extensions' / 'webui' / 'onboarding-success-end' / 'discovery-cards.html'
-          discovery = discovery_path.read_text(encoding='utf-8')
-          discovery = re.sub(
-              r'\s*<article class="discovery-cli-card".*?</article>\s*',
-              '\n',
-              discovery,
-              count=1,
-              flags=re.DOTALL,
-          )
-          discovery_path.write_text(discovery, encoding='utf-8')
+          if discovery_path.exists():
+              discovery = discovery_path.read_text(encoding='utf-8')
+              discovery = re.sub(r'\s*<article class="discovery-cli-card".*?</article>\s*', '\n', discovery, count=1, flags=re.DOTALL)
+              discovery_path.write_text(discovery, encoding='utf-8')
 
+          # Splash: use the complete Tamy identity instead of a text-only placeholder.
           splash_path = root / 'webui' / 'splash.html'
           splash = splash_path.read_text(encoding='utf-8')
-          tamy_splash_logo = (
-              '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 163 26" '
-              'aria-label="Tamy" role="img">'
-              '<text x="81.5" y="20" text-anchor="middle" font-family="Arial, sans-serif" '
-              'font-size="22" font-weight="700" fill="currentColor">Tamy</text></svg>'
-          )
+          splash = splash.replace('#startup-transition > svg', '#startup-transition > img.tamy-splash-logo')
           splash = re.sub(
-              r'<svg xmlns="http://www\.w3\.org/2000/svg" viewBox="0 0 163 26" (?:aria-hidden="true"|aria-label="Tamy" role="img")>.*?</svg>',
-              tamy_splash_logo,
+              r'<svg[^>]*(?:aria-label="Tamy"|aria-hidden="true")[^>]*>.*?</svg>|<img[^>]*class="tamy-splash-logo"[^>]*>',
+              '<img class="tamy-splash-logo" src="/public/dark.svg" alt="Tamy">',
               splash,
               count=1,
               flags=re.DOTALL,
           )
+          splash = splash.replace('html { background: #131313;', 'html { background: #0b0b0b;')
           splash_path.write_text(splash, encoding='utf-8')
+
+          # Main document uses matching startup styling and a dedicated late-loaded brand layer.
+          index_path = root / 'webui' / 'index.html'
+          index = index_path.read_text(encoding='utf-8')
+          index = index.replace('#startup-transition > svg', '#startup-transition > img.tamy-splash-logo')
+          if '/branding.css' not in index:
+              brand_css_link = '<link rel="preload" as="style" href="/branding.css" onload="this.onload=null;this.rel=\'stylesheet\'">\n    '
+              index = index.replace('<script type="module" src="/branding.js"></script>', brand_css_link + '<script type="module" src="/branding.js"></script>')
+          if 'name="theme-color"' not in index:
+              index = index.replace('<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">', '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">\n    <meta name="theme-color" content="#0B0B0B">')
+          index_path.write_text(index, encoding='utf-8')
+
+          branding_css = '''/* Tamy identity layer */
+          :root {
+            --tamy-gold: #D2A63C;
+            --tamy-gold-dark: #A97C22;
+            --color-primary-dark: #C9A24A;
+            --color-highlight-dark: #D2A63C;
+            --color-accent-dark: #C9A24A;
+            --color-primary-light: #8B661D;
+            --color-highlight-light: #A97C22;
+            --color-accent-light: #8B661D;
+          }
+
+          #startup-transition > img.tamy-splash-logo {
+            width: clamp(16rem, 38vw, 30rem);
+            max-width: 78vw;
+            height: auto;
+            object-fit: contain;
+          }
+
+          #a0-logo,
+          #a0-logo-collapsed {
+            background-color: transparent !important;
+            -webkit-mask-image: none !important;
+            mask-image: none !important;
+            background-repeat: no-repeat !important;
+            background-position: left center !important;
+            background-size: contain !important;
+          }
+
+          #a0-logo {
+            background-image: url('/public/a0-fullDark.svg') !important;
+          }
+
+          #a0-logo-collapsed {
+            background-image: url('/public/a0-collapsed.svg') !important;
+          }
+
+          .sidebar-header-panel {
+            border: 1px solid color-mix(in srgb, var(--tamy-gold) 18%, transparent) !important;
+          }
+
+          button:focus-visible,
+          a:focus-visible,
+          input:focus-visible,
+          textarea:focus-visible,
+          select:focus-visible {
+            outline-color: var(--tamy-gold) !important;
+          }
+          '''
+          (root / 'webui' / 'branding.css').write_text(branding_css, encoding='utf-8')
 
           branding_js = r'''const TAMY_BRAND = "Tamy";
           const TAMY_REPO_URL = "https://github.com/mohamedamouseo-a11y/tamy";
           const LEGACY_BRAND_RE = /\bAgent[\s-]+Zero\b/gi;
+          const LEGACY_SHORT_RE = /\bA0\b/g;
 
           function tamyBrandText(value) {
-            return typeof value === "string" ? value.replace(LEGACY_BRAND_RE, TAMY_BRAND) : value;
+            if (typeof value !== "string") return value;
+            return value.replace(LEGACY_BRAND_RE, TAMY_BRAND).replace(LEGACY_SHORT_RE, TAMY_BRAND);
           }
 
           function tamyApplyBranding(root = document) {
@@ -122,7 +219,7 @@ jobs:
             const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
             let node;
             while ((node = walker.nextNode())) {
-              if (node.parentElement?.closest("script,style")) continue;
+              if (node.parentElement?.closest("script,style,code,pre")) continue;
               const next = tamyBrandText(node.nodeValue);
               if (next !== node.nodeValue) node.nodeValue = next;
             }
@@ -166,48 +263,64 @@ jobs:
           '''
           (root / 'webui' / 'branding.js').write_text(branding_js, encoding='utf-8')
 
-          index_path = root / 'webui' / 'index.html'
-          index = index_path.read_text(encoding='utf-8')
-          if '/branding.js' not in index:
-              index = index.replace('</head>', '    <script type="module" src="/branding.js"></script>\n</head>', 1)
-          index_path.write_text(index, encoding='utf-8')
+          # Login gets the same logo and gold accent palette.
+          login_html_path = root / 'webui' / 'login.html'
+          login_html = login_html_path.read_text(encoding='utf-8')
+          login_html = login_html.replace('src="/public/dark.svg"', 'src="/public/dark.svg"')
+          login_html = login_html.replace('<title>Login - Tamy</title>', '<title>Tamy — Login</title>')
+          login_html_path.write_text(login_html, encoding='utf-8')
 
-          assets = {
-              'dark.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120"><text x="180" y="82" text-anchor="middle" font-family="Arial, sans-serif" font-size="72" font-weight="700" fill="#7a7a7a">Tamy</text></svg>',
-              'darkSymbol.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="3" y="3" width="26" height="26" rx="8" fill="currentColor" opacity=".16"/><path d="M8 8h16v4h-6v13h-4V12H8z" fill="currentColor"/></svg>',
-              'a0-fullDark.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 163 26" width="163" height="26"><text x="4" y="21" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#7a7a7a">Tamy</text></svg>',
-              'a0-collapsed.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 26" width="26" height="26"><path fill="#7a7a7a" d="M4 4h18v5h-6v14h-6V9H4z"/></svg>',
-              'favicon.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960"><rect width="960" height="960" rx="220" fill="#01041a"/><path d="M220 210h520v150H565v390H395V360H220z" fill="#fff"/></svg>',
-              'favicon_round.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960"><circle cx="480" cy="480" r="450" fill="#01041a"/><path d="M220 210h520v150H565v390H395V360H220z" fill="#fff"/></svg>',
-              'icon.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960"><rect width="960" height="960" rx="220" fill="#01041a"/><path d="M220 210h520v150H565v390H395V360H220z" fill="#fff"/></svg>',
-              'icon-maskable.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960"><rect width="960" height="960" fill="#01041a"/><path d="M220 210h520v150H565v390H395V360H220z" fill="#fff"/></svg>',
-          }
-          public_dir = root / 'webui' / 'public'
-          for name, content in assets.items():
-              (public_dir / name).write_text(content, encoding='utf-8')
+          login_css_path = root / 'webui' / 'login.css'
+          login_css = login_css_path.read_text(encoding='utf-8')
+          marker = '/* TAMY BRAND OVERRIDES */'
+          if marker in login_css:
+              login_css = login_css.split(marker, 1)[0].rstrip() + '\n'
+          login_css += '''\n/* TAMY BRAND OVERRIDES */
+          .login-form { border: 1px solid rgba(210,166,60,.22); box-shadow: 0 18px 55px rgba(0,0,0,.46); }
+          .logo { width: min(76vw, 21rem); margin-bottom: 1.75rem; }
+          .input-group label { color: #c9a24a; }
+          .input-group input:focus { outline: none; border-color: #d2a63c; box-shadow: 0 0 0 3px rgba(210,166,60,.12); }
+          button { background-color: #d2a63c; color: #111; font-weight: 700; }
+          button:hover { background-color: #b98b2d; }
+          '''
+          login_css_path.write_text(login_css, encoding='utf-8')
 
-          # Visible frontend source should no longer contain the legacy product name.
-          leftovers = []
-          for path in targets:
-              if not path.exists() or path in (sw_path, browser_store_path) or path.name == 'branding.js':
-                  continue
-              try:
-                  text = path.read_text(encoding='utf-8')
-              except UnicodeDecodeError:
-                  continue
-              for line_no, line in enumerate(text.splitlines(), 1):
-                  if brand_pattern.search(line):
-                      leftovers.append(f'{path}:{line_no}:{line.strip()}')
-          if leftovers:
-              raise SystemExit('Legacy visible branding remains:\n' + '\n'.join(leftovers[:100]))
+          # PWA metadata follows the same visual identity.
+          manifest_path = root / 'webui' / 'js' / 'manifest.json'
+          manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+          manifest['name'] = 'Tamy'
+          manifest['short_name'] = 'Tamy'
+          manifest['description'] = 'Tamy AI Agent'
+          manifest['background_color'] = '#0B0B0B'
+          manifest['theme_color'] = '#D2A63C'
+          manifest_path.write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+
+          # Basic identity verification.
+          required = [
+              public / 'tamy-logo-icon.png',
+              public / 'dark.svg',
+              public / 'a0-fullDark.svg',
+              public / 'a0-collapsed.svg',
+              public / 'favicon.svg',
+              root / 'webui' / 'branding.css',
+              root / 'webui' / 'branding.js',
+          ]
+          missing = [str(p) for p in required if not p.exists() or p.stat().st_size == 0]
+          if missing:
+              raise SystemExit('Missing Tamy identity assets: ' + ', '.join(missing))
+
+          if 'tamy-splash-logo' not in splash_path.read_text(encoding='utf-8'):
+              raise SystemExit('Tamy splash logo was not installed')
+          if '/branding.css' not in index_path.read_text(encoding='utf-8'):
+              raise SystemExit('Tamy branding stylesheet is not loaded')
           PY
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add webui plugins
           if git diff --cached --quiet; then
-            echo "No branding changes needed."
+            echo "Tamy identity is already current."
             exit 0
           fi
-          git commit -m "Harden Tamy frontend branding"
+          git commit -m "Apply Tamy visual identity"
           git push origin HEAD:main

@@ -1,0 +1,30 @@
+name: Validate Tamy RBAC
+
+on:
+  push:
+    paths:
+      - 'helpers/tamy_users.py'
+      - 'helpers/login.py'
+      - 'helpers/api.py'
+      - 'helpers/ui_server.py'
+      - 'api/tamy_users.py'
+      - 'api/settings_get.py'
+      - 'api/settings_set.py'
+      - 'webui/index.html'
+      - 'webui/components/settings/**'
+      - 'webui/components/sidebar/top-section/header-icons.html'
+      - 'tests/test_tamy_users.py'
+      - '.github/workflows/validate-tamy-rbac.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Tamy
+        uses: actions/checkout@v4
+      - name: Compile RBAC Python
+        run: |
+          python3 -m py_compile helpers/tamy_users.py helpers/login.py helpers/api.py helpers/ui_server.py api/tamy_users.py api/settings_get.py api/settings_set.py
+      - name: Run focused RBAC tests
+        run: python3 -m unittest tests.test_tamy_users -v

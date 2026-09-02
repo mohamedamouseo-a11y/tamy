@@ -9,25 +9,62 @@
     <link rel="icon" type="image/svg+xml" href="/public/favicon.svg">
 </head>
 <body>
-    <div class="login-container">
-        <form class="login-form" method="POST" action="/login{% if next %}?next={{ next|urlencode }}{% endif %}">
-            {% if next %}
-                <input type="hidden" name="next" value="{{ next }}">
-            {% endif %}
-            <img src="/public/dark.svg" alt="Tamy" class="logo">
-            <div class="input-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
+    <main class="login-shell">
+        <section class="login-visual" aria-label="Tamy AI Agent">
+            <div class="visual-glow"></div>
+            <div class="visual-brand" aria-hidden="true"></div>
+            <div class="visual-copy">
+                <span class="eyebrow">TAMY · AI AGENT</span>
+                <h2>Your intelligent workspace starts here.</h2>
+                <p>One secure place for your AI agent, files, tools, and work.</p>
             </div>
-            <div class="input-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
+        </section>
+
+        <section class="login-panel">
+            <div class="login-card">
+                <div class="brand-logo" role="img" aria-label="Tamy AI Agent"></div>
+                <div class="login-heading">
+                    <h1>Welcome Back</h1>
+                    <p>Sign in to continue to your Tamy workspace</p>
+                </div>
+
+                <form class="login-form" method="POST" action="/login{% if next %}?next={{ next|urlencode }}{% endif %}">
+                    {% if next %}
+                        <input type="hidden" name="next" value="{{ next }}">
+                    {% endif %}
+
+                    <div class="input-group">
+                        <label for="username">Username</label>
+                        <div class="field-wrap">
+                            <span class="field-icon" aria-hidden="true">●</span>
+                            <input type="text" id="username" name="username" autocomplete="username" placeholder="Enter your username" required autofocus>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <div class="field-wrap">
+                            <span class="field-icon field-icon-lock" aria-hidden="true">◆</span>
+                            <input type="password" id="password" name="password" autocomplete="current-password" placeholder="Enter your password" required>
+                        </div>
+                    </div>
+
+                    <button type="submit">
+                        <span>Login</span>
+                        <span class="button-arrow" aria-hidden="true">→</span>
+                    </button>
+
+                    {% if error %}
+                        <p class="error" role="alert">{{ error }}</p>
+                    {% endif %}
+                </form>
+
+                <div class="login-footnote">
+                    <span class="status-dot"></span>
+                    Secure access to Tamy
+                </div>
             </div>
-            <button type="submit">Login</button>
-            {% if error %}
-                <p class="error">{{ error }}</p>
-            {% endif %}
-        </form>
-    </div>
+        </section>
+    </main>
 </body>
 </html>

@@ -44,6 +44,8 @@ jobs:
         id: tests
         continue-on-error: true
         shell: bash
+        env:
+          PYTHONPATH: .
         run: |
           set -o pipefail
           pytest -q tests/test_tamy_developer_hub.py 2>&1 | tee /tmp/devhub-tests.log

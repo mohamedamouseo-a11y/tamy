@@ -112,15 +112,15 @@ def has_users() -> bool:
 
 
 def ensure_legacy_superadmin(username: str, password: str) -> None:
+    """Bootstrap existing AUTH_LOGIN/AUTH_PASSWORD exactly as configured."""
     username = str(username or "").strip()
     if not username:
         return
+    password = str(password or "")
     with _LOCK:
         data = _load()
         if data["users"]:
             return
-        password = _validate_password(password)
-        username = _validate_username(username)
         salt, password_hash = _hash_password(password)
         now = _now()
         data["users"].append({

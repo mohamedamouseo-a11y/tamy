@@ -7,6 +7,15 @@
     <link rel="stylesheet" href="/vendor/fonts/fonts.css">
     <link rel="stylesheet" href="/login-media.css">
     <link rel="stylesheet" href="/login.css">
+    <style>
+        /* Tamy login visual tuning: keep the official logo present but understated. */
+        .login-visual { background-position: left center; }
+        .visual-brand { width: clamp(4rem, 5vw, 5.5rem); }
+        .brand-logo { width: 6.4rem; margin-bottom: .8rem; }
+        @media (max-width: 560px) {
+            .brand-logo { width: 5.4rem; margin-bottom: .6rem; }
+        }
+    </style>
     <link rel="icon" type="image/svg+xml" href="/public/favicon.svg">
 </head>
 <body>

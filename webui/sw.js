@@ -205,6 +205,7 @@ function isCacheableRequest(request) {
     url.pathname === "/" ||
     url.pathname === "/login" ||
     url.pathname === "/logout" ||
+    url.pathname.startsWith("/ui/") ||
     url.pathname.startsWith("/api/") ||
     url.pathname.startsWith("/ws") ||
     url.pathname.startsWith("/socket.io/") ||

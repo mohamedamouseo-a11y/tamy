@@ -34,53 +34,21 @@
 
     <script>
         (() => {
-            const APP_DOCUMENT_PATH = "/ui/index"
+            const APP_NAVIGATION_PATH = "/index.html"
             const ACTIVATION_TIMEOUT_MS = 8000
             const CACHE_TIMEOUT_MS = 10000
-            const FALLBACK_TIMEOUT_MS = 15000
-            let replacementStarted = false
+            const NAVIGATION_FALLBACK_MS = 3000
+            let navigationStarted = false
 
-            const appDocumentPromise = fetch(APP_DOCUMENT_PATH, {
-                cache: "no-store",
-                credentials: "same-origin",
-                headers: { Accept: "text/html" },
-            }).then(async (response) => {
-                if (!response.ok) throw new Error(`App document request failed: ${response.status}`)
-                return response.text()
-            })
-
-            const replaceWithApp = async () => {
-                if (replacementStarted) return
-                const appHtml = await appDocumentPromise
-                if (replacementStarted) return
-                replacementStarted = true
-                const overlay = document.getElementById("startup-transition")
-                if (overlay && document.documentElement.dataset.splashTheme === "light") {
-                    overlay.dataset.theme = "light"
-                }
-                const appWithTransition = overlay
-                    ? appHtml.replace(
-                        /<body\b[^>]*>/i,
-                        (bodyTag) => bodyTag + overlay.outerHTML,
-                    )
-                    : appHtml
-                document.open()
-                document.write(appWithTransition)
-                document.close()
+            const openApp = () => {
+                if (navigationStarted) return
+                navigationStarted = true
+                location.replace(new URL(APP_NAVIGATION_PATH, location.href).href)
             }
 
-            const reportAppLoadFailure = (error) => {
-                console.error("WebUI document unavailable.", error)
-                const status = document.getElementById("startup-status")
-                if (status) {
-                    status.textContent = "Unable to load Tamy. Refresh to retry."
-                    status.style.cssText = "position:static;width:auto;height:auto;clip-path:none"
-                }
-            }
-
-            const fallbackTimer = setTimeout(() => {
-                replaceWithApp().catch(reportAppLoadFailure)
-            }, FALLBACK_TIMEOUT_MS)
+            // The Service Worker is an optimization, never a prerequisite for opening Tamy.
+            // If registration, activation or cache preparation stalls, continue to the app.
+            const fallbackTimer = setTimeout(openApp, NAVIGATION_FALLBACK_MS)
 
             const withTimeout = (promise, timeout, label) => new Promise((resolve, reject) => {
                 const timer = setTimeout(() => reject(new Error(`${label} timed out`)), timeout)
@@ -140,16 +108,10 @@
                     const onControllerChange = () => {
                         const controller = navigator.serviceWorker.controller
                         if (controller?.scriptURL !== expectedUrl) return
-                        navigator.serviceWorker.removeEventListener(
-                            "controllerchange",
-                            onControllerChange,
-                        )
+                        navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange)
                         resolve(controller)
                     }
-                    navigator.serviceWorker.addEventListener(
-                        "controllerchange",
-                        onControllerChange,
-                    )
+                    navigator.serviceWorker.addEventListener("controllerchange", onControllerChange)
                 }), ACTIVATION_TIMEOUT_MS, "Service worker control")
             }
 
@@ -171,10 +133,7 @@
                         }
                     }
                     try {
-                        worker.postMessage(
-                            { type: "preload-ui-bundle", bundle },
-                            [channel.port2],
-                        )
+                        worker.postMessage({ type: "preload-ui-bundle", bundle }, [channel.port2])
                     } catch (error) {
                         channel.port1.close()
                         reject(error)
@@ -184,6 +143,7 @@
 
             const initialize = async () => {
                 if (!navigator.serviceWorker) return
+
                 const response = await fetch("/ui/asset-bundle", {
                     cache: "no-cache",
                     credentials: "same-origin",
@@ -221,7 +181,7 @@
                 .catch((error) => console.warn("WebUI bootstrap cache unavailable.", error))
                 .finally(() => {
                     clearTimeout(fallbackTimer)
-                    replaceWithApp().catch(reportAppLoadFailure)
+                    openApp()
                 })
         })()
     </script>
